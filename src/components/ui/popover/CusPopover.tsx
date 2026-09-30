@@ -36,7 +36,7 @@ export function CusPopover({
       <Popover.Trigger asChild>{trigger}</Popover.Trigger>
       <Portal>
         <Popover.Positioner>
-          <Popover.Content width={width} borderRadius="xl">
+          <Popover.Content width={width} borderRadius="md">
             {showArrow && (
               <Popover.Arrow>
                 <Popover.ArrowTip />

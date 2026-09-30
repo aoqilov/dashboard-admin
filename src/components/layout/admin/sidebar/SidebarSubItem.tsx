@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
 interface SidebarSubItemProps {
@@ -6,6 +7,7 @@ interface SidebarSubItemProps {
   onClick: () => void
 }
 
+/** AdminKit uslubi: "→ Nom", faol bo'lsa rangli matn */
 export function SidebarSubItem({ label, active, onClick }: SidebarSubItemProps) {
   return (
     <li>
@@ -13,12 +15,11 @@ export function SidebarSubItem({ label, active, onClick }: SidebarSubItemProps) 
         type="button"
         onClick={onClick}
         className={cn(
-          'flex w-full items-center rounded-control px-3 py-2.5 text-sm font-medium transition-colors',
-          active
-            ? 'bg-primary/8 text-primary dark:bg-primary/12 dark:text-primary-light'
-            : 'text-content hover:bg-hover',
+          'flex w-full items-center gap-2.5 py-2 pr-6 pl-10 text-xs transition-colors',
+          active ? 'text-primary dark:text-primary-light' : 'text-muted hover:text-heading',
         )}
       >
+        <ArrowRight className="size-3.5 shrink-0" />
         {label}
       </button>
     </li>

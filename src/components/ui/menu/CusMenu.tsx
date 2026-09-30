@@ -29,7 +29,7 @@ export function CusMenu({ trigger, items, onSelect, placement = 'bottom-end' }: 
       <Menu.Trigger asChild>{trigger}</Menu.Trigger>
       <Portal>
         <Menu.Positioner>
-          <Menu.Content minW="48" borderRadius="xl" p="1.5">
+          <Menu.Content minW="48" borderRadius="md" p="1.5">
             {items.map((item, index) => {
               if ('separator' in item) return <Menu.Separator key={`sep-${index}`} />
               if ('groupLabel' in item) {

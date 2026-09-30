@@ -14,7 +14,7 @@ const DESKTOP_QUERY = '(min-width: 1024px)'
 
 /**
  * [ Sidebar | Header          ]
- * [         | Content (max-w) ]
+ * [         | Content (full)  ]
  */
 export function AppLayout({ children, activeId, onNavigate }: AppLayoutProps) {
   const [collapsed, setCollapsed] = useState(false)
@@ -49,7 +49,7 @@ export function AppLayout({ children, activeId, onNavigate }: AppLayoutProps) {
         )}
       >
         <Header mobileOpen={mobileOpen} onMenuClick={handleMenuClick} />
-        <main className="mx-auto max-w-screen-2xl p-4 md:p-6">{children}</main>
+        <main className="w-full p-4 md:p-6">{children}</main>
       </div>
     </div>
   )

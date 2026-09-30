@@ -4,6 +4,7 @@ import { CusButton } from '@/components/ui/buttons/CusButton'
 import { CusInput } from '@/components/ui/inputs/CusInput'
 import { CusSwitch } from '@/components/ui/inputs/CusSwitch'
 import { CusSelect } from '@/components/ui/select/CusSelect'
+import { AppearanceCard } from './components/AppearanceCard'
 
 const LANGUAGES = [
   { label: "O'zbekcha", value: 'uz' },
@@ -44,6 +45,8 @@ export default function FeatureSettings() {
             <CusSwitch>Haftalik hisobot emailga</CusSwitch>
           </div>
         </CusCard>
+
+        <AppearanceCard />
       </div>
     </div>
   )

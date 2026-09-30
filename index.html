@@ -7,16 +7,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <title>Master Admin</title>
-    <!-- Sahifa yuklanayotganda oq "yaltirash" bo'lmasligi uchun temani React'dan oldin qo'yamiz -->
+    <!-- Sahifa yuklanayotganda oq "yaltirash" bo'lmasligi uchun tema va accent'ni React'dan oldin qo'yamiz -->
     <script>
       try {
         var saved = localStorage.getItem('theme')
         var dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
         if (dark) document.documentElement.classList.add('dark')
+        var accent = localStorage.getItem('accent')
+        if (accent) document.documentElement.dataset.accent = accent
       } catch (e) {}
     </script>
   </head>

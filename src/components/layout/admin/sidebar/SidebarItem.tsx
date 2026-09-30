@@ -28,24 +28,25 @@ export function SidebarItem({ item, open, activeId, compact, onToggle, onSelect 
         aria-expanded={hasChildren ? open : undefined}
         onClick={hasChildren ? onToggle : () => onSelect(item.id)}
         className={cn(
-          'group flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors',
-          compact && 'justify-center',
-          active || (hasChildren && open)
-            ? 'bg-primary/8 text-primary dark:bg-primary/12 dark:text-primary-light'
-            : 'text-content hover:bg-hover',
+          // AdminKit: chetdan chetgacha, faol bo'lsa chapda rangli chiziq
+          'group flex w-full items-center gap-3 border-l-3 px-6 py-2.5 text-sm transition-colors',
+          compact && 'justify-center px-0',
+          active
+            ? 'border-primary bg-linear-to-r from-primary/10 to-transparent text-heading dark:from-primary/15'
+            : 'border-transparent text-content hover:text-heading',
         )}
       >
         <Icon
           className={cn(
-            'size-6 shrink-0',
-            !(active || open) && 'text-muted group-hover:text-content',
+            'size-4.5 shrink-0',
+            active ? 'text-primary dark:text-primary-light' : 'text-muted group-hover:text-content',
           )}
-          strokeWidth={1.6}
+          strokeWidth={1.8}
         />
         {!compact && <span className="flex-1 text-left whitespace-nowrap">{item.label}</span>}
         {!compact && hasChildren && (
           <ChevronDown
-            className={cn('size-5 shrink-0 transition-transform duration-200', open && 'rotate-180')}
+            className={cn('size-4 shrink-0 text-muted transition-transform duration-200', open && 'rotate-180')}
           />
         )}
       </button>
@@ -57,7 +58,7 @@ export function SidebarItem({ item, open, activeId, compact, onToggle, onSelect 
             open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
           )}
         >
-          <ul className="ml-9 flex flex-col gap-1 overflow-hidden pt-1">
+          <ul className="flex flex-col overflow-hidden">
             {item.children!.map((child) => (
               <SidebarSubItem
                 key={child.id}

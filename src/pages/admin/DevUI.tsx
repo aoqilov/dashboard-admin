@@ -132,7 +132,7 @@ export default function DevUI() {
           <DevRow title="CusLegend">
             <CusLegend
               items={[
-                { label: 'Current year', color: COLORS.primary },
+                { label: 'Current year', color: 'var(--color-primary)' },
                 { label: 'Last year', color: COLORS.danger },
               ]}
             />

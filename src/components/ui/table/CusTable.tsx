@@ -39,7 +39,7 @@ export function CusTable<T>({
   className,
 }: CusTableProps<T>) {
   return (
-    <Table.ScrollArea borderWidth="1px" borderColor="border.muted" borderRadius="xl" className={className}>
+    <Table.ScrollArea borderWidth="1px" borderColor="border.muted" borderRadius="md" className={className}>
       <Table.Root size={size} striped={striped} interactive={Boolean(onRowClick)} stickyHeader={stickyHeader}>
         <Table.Header>
           <Table.Row bg="bg.subtle">

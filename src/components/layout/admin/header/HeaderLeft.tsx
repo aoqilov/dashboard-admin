@@ -14,14 +14,14 @@ export function HeaderLeft({ mobileOpen, onMenuClick }: HeaderLeftProps) {
       <CusIconButton
         icon={mobileOpen ? X : AlignLeft}
         label="Toggle sidebar"
-        variant="outline"
+        variant="ghost"
         shape="square"
         onClick={onMenuClick}
       />
       <div className="lg:hidden">
         <SidebarLogo compact />
       </div>
-      <CusSearchInput shortcut className="hidden max-w-[430px] lg:flex" />
+      <CusSearchInput shortcut className="hidden max-w-[430px] border-transparent bg-body shadow-none lg:flex dark:bg-panel" />
     </div>
   )
 }

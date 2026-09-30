@@ -11,10 +11,10 @@ export function HeaderRight() {
       <CusIconButton
         icon={theme === 'dark' ? Sun : Moon}
         label={theme === 'dark' ? 'Light mode' : 'Dark mode'}
-        variant="outline"
+        variant="ghost"
         onClick={toggleTheme}
       />
-      <CusIconButton icon={Bell} label="Notifications" variant="outline" dot />
+      <CusIconButton icon={Bell} label="Notifications" variant="ghost" dot />
       <HeaderUser name="Sarah Parker" />
     </div>
   )

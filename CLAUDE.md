@@ -51,7 +51,9 @@ pages/admin/DevUI.tsx  /preview-dev — live demo of every Cus* component (look 
 - API spec: `swigerapi.yaml` (6k lines — never read whole; Grep for the path/schema name, then Read with offset).
 
 ## Styling rules
-- Tailwind classes with project tokens: `bg-surface bg-body bg-hover border-border border-border-strong text-heading text-content text-muted text-subtle text-primary rounded-card rounded-control shadow-xs`. Dark mode via `dark:`. Merge with `cn()`.
+- Visual style = AdminKit (light: #f5f7fb/white, dark: navy #121a23/#1a2430, primary #3b7ddd, Inter, 4px radius, borderless cards with `shadow-card`).
+- Tailwind classes with project tokens: `bg-surface bg-body bg-panel bg-topbar bg-hover border-border border-border-strong text-heading text-content text-muted text-subtle text-primary rounded-card rounded-control shadow-xs shadow-card`. Dark mode via `dark:`. Merge with `cn()`.
+- Accent (Settings → Ko'rinish): `<html data-accent>` switches `--brand-*` scale in index.css; `--color-primary*` and Chakra `brand` read it. Adding an accent = CSS block + entry in `theme/accents.ts`. Charts need hex: `getAccentColor(accent, theme)`, never hardcode primary.
 - Prefer existing `Cus*` components; Chakra only inside ui-kit components. Icons: `lucide-react`.
 - Page layout: `<div className="flex flex-col gap-6"><PageHeader …/><CusCard>…</CusCard></div>`.
 

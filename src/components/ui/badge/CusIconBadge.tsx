@@ -9,7 +9,7 @@ const sizes = {
 }
 
 const shapes = {
-  square: 'rounded-xl',
+  square: 'rounded-control',
   circle: 'rounded-full',
 }
 

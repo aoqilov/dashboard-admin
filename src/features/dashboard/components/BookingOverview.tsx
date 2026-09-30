@@ -5,6 +5,8 @@ import { CusLegend } from '@/components/ui/legend/CusLegend'
 import { CusLabel } from '@/components/ui/typography/CusTypography'
 import { COLORS } from '@/config/charts'
 import { BOOKING_OVERVIEW } from '@/data/dashboard'
+import { useTheme } from '@/hooks/useTheme'
+import { getAccentColor } from '@/theme/accents'
 import { ChartMenuButton } from './ChartMenuButton'
 
 const { months, current, last } = BOOKING_OVERVIEW
@@ -23,6 +25,9 @@ function Summary({ title, total, change }: { title: string; total: string; chang
 }
 
 export function BookingOverview() {
+  const { theme, accent } = useTheme()
+  const primary = getAccentColor(accent, theme)
+
   return (
     <CusCard className="h-full">
       <CusCardHeader title="Booking Overview" />
@@ -33,7 +38,7 @@ export function BookingOverview() {
           <Summary title="Last year" {...last} />
           <CusLegend
             items={[
-              { label: 'Current year', color: COLORS.primary },
+              { label: 'Current year', color: primary },
               { label: 'Last year', color: COLORS.danger },
             ]}
           />
@@ -50,7 +55,7 @@ export function BookingOverview() {
           { name: 'Last year', data: last.data },
         ]}
         options={{
-          colors: [COLORS.primary, COLORS.danger],
+          colors: [primary, COLORS.danger],
           stroke: { curve: 'smooth', width: 3 },
           markers: { size: 5, strokeWidth: 0, hover: { size: 7 } },
           xaxis: { categories: months },

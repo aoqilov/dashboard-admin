@@ -15,7 +15,7 @@ export function CusHoverCard({ trigger, children, placement = 'bottom', openDela
       <HoverCard.Trigger asChild>{trigger}</HoverCard.Trigger>
       <Portal>
         <HoverCard.Positioner>
-          <HoverCard.Content borderRadius="xl">
+          <HoverCard.Content borderRadius="md">
             <HoverCard.Arrow>
               <HoverCard.ArrowTip />
             </HoverCard.Arrow>

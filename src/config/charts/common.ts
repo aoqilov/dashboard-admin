@@ -11,7 +11,7 @@ export function getBaseChartOptions(theme: Theme): ApexOptions {
       toolbar: { show: false },
       zoom: { enabled: false },
       parentHeightOffset: 0,
-      fontFamily: 'Outfit, sans-serif',
+      fontFamily: 'Inter, sans-serif',
       background: 'transparent',
     },
     dataLabels: { enabled: false },

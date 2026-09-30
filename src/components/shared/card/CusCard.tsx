@@ -9,7 +9,7 @@ type CusCardProps = HTMLAttributes<HTMLDivElement>
 export function CusCard({ className, ...props }: CusCardProps) {
   return (
     <div
-      className={cn('rounded-card border border-border bg-surface p-5 sm:p-6', className)}
+      className={cn('rounded-card bg-surface p-5 shadow-card sm:p-6', className)}
       {...props}
     />
   )
@@ -27,7 +27,9 @@ interface CusCardHeaderProps {
 export function CusCardHeader({ title, action, className }: CusCardHeaderProps) {
   return (
     <div className={cn('mb-5 flex items-center justify-between gap-3', className)}>
-      <CusTitle>{title}</CusTitle>
+      <CusTitle size="sm" className="text-muted dark:text-heading">
+        {title}
+      </CusTitle>
       {action}
     </div>
   )

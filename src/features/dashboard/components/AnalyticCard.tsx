@@ -3,10 +3,12 @@ import { BaseChart } from '@/components/charts/BaseChart'
 import { CusLabel, CusValue } from '@/components/ui/typography/CusTypography'
 import { CHART_THEME, COLORS } from '@/config/charts'
 import { useTheme } from '@/hooks/useTheme'
+import { getAccentColor } from '@/theme/accents'
 import { ANALYTIC } from '@/data/dashboard'
 
 export function AnalyticCard() {
-  const { theme } = useTheme()
+  const { theme, accent } = useTheme()
+  const primary = getAccentColor(accent, theme)
 
   return (
     <CusCard className="flex h-full flex-col">
@@ -19,7 +21,7 @@ export function AnalyticCard() {
           series={[ANALYTIC.booked, ANALYTIC.cancelled]}
           options={{
             labels: ['Booked', 'Cancelled'],
-            colors: [COLORS.primary, COLORS.danger],
+            colors: [primary, COLORS.danger],
             stroke: { width: 3, colors: [CHART_THEME[theme].surface] },
             plotOptions: { pie: { donut: { size: '68%' } } },
             tooltip: { y: { formatter: (value: number) => `${value}%` } },

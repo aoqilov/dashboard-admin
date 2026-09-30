@@ -25,7 +25,7 @@ export function CusLegend({ items, className }: CusLegendProps) {
 }
 
 interface CusLegendDotProps {
-  /** Hex yoki CSS o'zgaruvchi: '#465fff', 'var(--color-dark)' */
+  /** Hex yoki CSS o'zgaruvchi: '#3b7ddd', 'var(--color-dark)' */
   color: string
   className?: string
 }

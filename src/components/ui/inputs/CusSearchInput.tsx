@@ -30,7 +30,7 @@ export function CusSearchInput({
   return (
     <label
       className={cn(
-        'relative flex h-11 w-full items-center rounded-control border border-border bg-transparent shadow-xs transition-colors',
+        'relative flex h-10 w-full items-center rounded-control border border-border bg-transparent shadow-xs transition-colors',
         'focus-within:border-primary/60 focus-within:shadow-focus dark:bg-white/3',
         className,
       )}

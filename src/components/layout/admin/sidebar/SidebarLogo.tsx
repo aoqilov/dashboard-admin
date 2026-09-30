@@ -16,7 +16,7 @@ export function SidebarLogo({ compact }: SidebarLogoProps) {
         </svg>
       </span>
       {!compact && (
-        <span className="text-xl font-semibold whitespace-nowrap text-heading">Master Admin</span>
+        <span className="text-xl font-semibold whitespace-nowrap text-heading">Icatalog admin</span>
       )}
     </a>
   )

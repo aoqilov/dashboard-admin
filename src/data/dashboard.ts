@@ -47,7 +47,7 @@ export const SALE_BY_LOCATION: LocationSale[] = [
   { name: 'Singapore', amount: 21, color: COLORS.warning },
   { name: 'Maldives', amount: 19, color: COLORS.success },
   { name: 'Barbados', amount: 18, color: COLORS.danger },
-  { name: 'Monaco', amount: 15, color: COLORS.primary },
+  { name: 'Monaco', amount: 15, color: 'var(--color-primary)' },
   { name: 'Malta', amount: 12, color: 'var(--color-dark)' },
   { name: 'Palau', amount: 9, color: COLORS.info },
 ]

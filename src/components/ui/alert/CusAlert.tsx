@@ -23,7 +23,7 @@ export function CusAlert({
   className,
 }: CusAlertProps) {
   return (
-    <Alert.Root status={status} variant={variant} borderRadius="xl" alignItems="flex-start" className={className}>
+    <Alert.Root status={status} variant={variant} borderRadius="md" alignItems="flex-start" className={className}>
       <Alert.Indicator />
       <Alert.Content>
         <Alert.Title fontWeight="semibold">{title}</Alert.Title>

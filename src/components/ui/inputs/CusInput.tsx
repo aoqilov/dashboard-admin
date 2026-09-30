@@ -45,7 +45,7 @@ export function CusInput({
           disabled={isDisabled}
           aria-invalid={Boolean(error)}
           className={cn(
-            'h-11 w-full rounded-control border bg-transparent px-4 text-sm text-heading shadow-xs transition-colors outline-none',
+            'h-10 w-full rounded-control border bg-transparent px-4 text-sm text-heading shadow-xs transition-colors outline-none',
             'placeholder:text-subtle focus:shadow-focus dark:bg-white/3',
             'disabled:cursor-not-allowed disabled:bg-hover disabled:text-muted',
             leftIcon && 'pl-12',

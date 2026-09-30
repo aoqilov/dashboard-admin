@@ -34,7 +34,7 @@ export function CusAccordion({
       defaultValue={defaultValue}
       variant={variant}
       size={size}
-      borderRadius="xl"
+      borderRadius="md"
       className={className}
     >
       {items.map((item) => (

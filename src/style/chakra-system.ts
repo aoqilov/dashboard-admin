@@ -5,7 +5,7 @@ import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
  *
  * - bg / fg / border semantik tokenlari bizning CSS o'zgaruvchilarimizga ulanadi,
  *   shuning uchun Chakra komponentlari light/dark bilan o'zi almashadi (.dark klassi).
- * - `brand` palitrasi — asosiy rang (#465fff). Barcha komponentlar default shu rangda.
+ * - `brand` palitrasi — tanlangan accent (index.css dagi --brand-*). Barcha komponentlar default shu rangda.
  * - `gray` — TailAdmin kulrang shkalasi (outline / ghost / subtle variantlar uchun).
  * - preflight o'chirilgan: reset'ni Tailwind qiladi.
  */
@@ -25,24 +25,24 @@ const config = defineConfig({
         body: { value: 'var(--font-sans)' },
       },
       radii: {
-        l1: { value: '6px' },
+        l1: { value: '3px' },
         l2: { value: 'var(--radius-control)' },
-        l3: { value: '12px' },
+        l3: { value: '6px' },
       },
       colors: {
         brand: {
-          25: { value: '#f2f7ff' },
-          50: { value: '#ecf3ff' },
-          100: { value: '#dde9ff' },
-          200: { value: '#c2d6ff' },
-          300: { value: '#9cb9ff' },
-          400: { value: '#7592ff' },
-          500: { value: '#465fff' },
-          600: { value: '#3641f5' },
-          700: { value: '#2a31d8' },
-          800: { value: '#252dae' },
-          900: { value: '#262e89' },
-          950: { value: '#161950' },
+          25: { value: 'var(--brand-25)' },
+          50: { value: 'var(--brand-50)' },
+          100: { value: 'var(--brand-100)' },
+          200: { value: 'var(--brand-200)' },
+          300: { value: 'var(--brand-300)' },
+          400: { value: 'var(--brand-400)' },
+          500: { value: 'var(--brand-500)' },
+          600: { value: 'var(--brand-600)' },
+          700: { value: 'var(--brand-700)' },
+          800: { value: 'var(--brand-800)' },
+          900: { value: 'var(--brand-900)' },
+          950: { value: 'var(--brand-950)' },
         },
         gray: {
           50: { value: '#f9fafb' },
@@ -95,7 +95,7 @@ const config = defineConfig({
           contrast: { value: 'white' },
           fg: { value: { _light: '{colors.brand.500}', _dark: '{colors.brand.300}' } },
           muted: { value: { _light: '{colors.brand.100}', _dark: '{colors.brand.900}' } },
-          subtle: { value: { _light: '{colors.brand.50}', _dark: 'rgb(70 95 255 / 0.15)' } },
+          subtle: { value: { _light: '{colors.brand.50}', _dark: 'color-mix(in srgb, var(--brand-500) 15%, transparent)' } },
           emphasized: { value: { _light: '{colors.brand.200}', _dark: '{colors.brand.800}' } },
           focusRing: { value: '{colors.brand.500}' },
         },
