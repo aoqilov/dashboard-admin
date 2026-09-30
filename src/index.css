@@ -1,0 +1,129 @@
+/*
+ * CSS qatlamlar tartibi: avval Chakra (reset, tokens, recipes), keyin Tailwind.
+ * Shunda Chakra komponentiga berilgan Tailwind klasslari (className) ustun turadi.
+ */
+@layer reset, base, tokens, recipes, theme, components, utilities;
+
+@import 'tailwindcss';
+
+/*
+ * Dizayn tokenlari.
+ * @theme ichidagi har bir o'zgaruvchi Tailwind klassiga aylanadi:
+ *   --color-primary  -> bg-primary, text-primary, border-primary ...
+ *   --radius-card    -> rounded-card
+ */
+@theme {
+  --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+
+  /*
+   * Tipografiya shkalasi (Tailwind standartidan bir pog'ona kichik).
+   * Butun loyihadagi shrift o'lchamlari shu yerdan boshqariladi.
+   */
+  --text-2xs: 10px;
+  --text-2xs--line-height: 1.4;
+  --text-xs: 12px;
+  --text-xs--line-height: 1.45;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.5;
+  --text-base: 15px;
+  --text-base--line-height: 1.5;
+  --text-lg: 17px;
+  --text-lg--line-height: 1.45;
+  --text-xl: 19px;
+  --text-xl--line-height: 1.4;
+  --text-2xl: 21px;
+  --text-2xl--line-height: 1.35;
+  --text-3xl: 26px;
+  --text-3xl--line-height: 1.3;
+  --text-4xl: 30px;
+  --text-4xl--line-height: 1.2;
+
+  /* Asosiy ranglar */
+  --color-primary: #465fff;
+  --color-primary-light: #7592ff;
+  --color-primary-dark: #3641f5; /* hover */
+  --color-danger: #f04438;
+  --color-success: #12b76a;
+  --color-info: #0ba5ec;
+  --color-warning: #fb6514;
+  --color-dark: #1d2939;
+
+  /* Fon va chegaralar */
+  --color-body: #f9fafb; /* sahifa foni */
+  --color-panel: #ffffff; /* sidebar va header */
+  --color-surface: #ffffff; /* kartalar */
+  --color-hover: #f2f4f7; /* hover foni */
+  --color-border: #e4e7ec;
+  --color-border-strong: #d0d5dd; /* input va tugma chegarasi */
+
+  /* Matn */
+  --color-heading: #1d2939;
+  --color-content: #344054;
+  --color-muted: #667085;
+  --color-subtle: #98a2b3;
+
+  /* Radius */
+  --radius-card: 16px;
+  --radius-control: 8px;
+
+  /* Soya */
+  --shadow-xs: 0 1px 2px 0 rgb(16 24 40 / 0.05);
+  --shadow-focus: 0 0 0 4px rgb(70 95 255 / 0.12);
+
+  /* Layout o'lchamlari */
+  --spacing-sidebar: 290px;
+  --spacing-sidebar-collapsed: 90px;
+  --spacing-header: 72px;
+}
+
+/* `dark:` variant — <html class="dark"> bo'lganda ishlaydi */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Dark mode: @theme dagi o'zgaruvchilarni qayta belgilaymiz.
+ * Barcha bg-body, text-heading ... klasslar o'zi yangi rangga o'tadi.
+ */
+.dark {
+  color-scheme: dark;
+
+  --color-primary-light: #9cb9ff;
+  --color-dark: #e4e4e7;
+
+  /* Neytral qora (ko'k tusi yo'q) */
+  --color-body: #18181b;
+  --color-panel: #18181b;
+  --color-surface: #212124;
+  --color-hover: #2a2a2e;
+  --color-border: #2f2f34;
+  --color-border-strong: #3f3f46;
+
+  --color-heading: #f4f4f5;
+  --color-content: #d4d4d8;
+  --color-muted: #a1a1aa;
+  --color-subtle: #71717a;
+}
+
+@layer base {
+  html,
+  body {
+    @apply bg-body font-sans text-content antialiased;
+    transition: background-color 0.2s ease;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+
+  /* Standart chegara rangi (Tailwind preflight'da currentColor — Chakra jadval, dropzone uchun kerak) */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+}
+
+/* ApexCharts: tooltip shriftini loyihaga moslash */
+.apexcharts-canvas,
+.apexcharts-tooltip {
+  font-family: var(--font-sans) !important;
+}

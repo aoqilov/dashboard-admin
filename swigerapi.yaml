@@ -1,0 +1,6042 @@
+openapi: 3.0.3
+info:
+  title: Birid API
+  version: 1.0.0
+  description: Clothing marketplace backend - buyers and store admins.
+paths:
+  /api/v1/customers/favorites/products/{product_id}:
+    post:
+      operationId: customers_favorites_products_create
+      summary: Add product to favorites
+      parameters:
+      - in: path
+        name: product_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - customers-favorites
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          description: Added to favorites.
+    delete:
+      operationId: customers_favorites_products_destroy
+      summary: Remove product from favorites
+      parameters:
+      - in: path
+        name: product_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - customers-favorites
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          description: Removed from favorites.
+  /api/v1/customers/favorites/products/get-all:
+    post:
+      operationId: customers_favorites_products_get_all_create
+      description: Buyer's favorited products, paginated - no field filtering (see
+        products' .../get-all for that pattern).
+      summary: List favorite products (paginated)
+      tags:
+      - customers-favorites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PageRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PageRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PageRequestRequest'
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFavoriteProduct'
+          description: ''
+  /api/v1/customers/favorites/stores/{store_id}:
+    post:
+      operationId: customers_favorites_stores_create
+      summary: Add store to favorites
+      parameters:
+      - in: path
+        name: store_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - customers-favorites
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          description: Added to favorites.
+    delete:
+      operationId: customers_favorites_stores_destroy
+      summary: Remove store from favorites
+      parameters:
+      - in: path
+        name: store_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - customers-favorites
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          description: Removed from favorites.
+  /api/v1/customers/favorites/stores/get-all:
+    post:
+      operationId: customers_favorites_stores_get_all_create
+      description: Buyer's favorited stores, paginated - no field filtering (see products'
+        .../get-all for that pattern).
+      summary: List favorite stores (paginated)
+      tags:
+      - customers-favorites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PageRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PageRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PageRequestRequest'
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStore'
+          description: ''
+  /api/v1/customers/login:
+    post:
+      operationId: customers_login_create
+      summary: Buyer login
+      tags:
+      - customers-auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequestRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+          description: ''
+  /api/v1/customers/me:
+    get:
+      operationId: customers_me_retrieve
+      description: Current buyer's own profile - read and edit it (name/age/gender/city/avatar).
+      summary: Current buyer
+      tags:
+      - customers-auth
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyerMe'
+          description: ''
+    patch:
+      operationId: customers_me_partial_update
+      description: Current buyer's own profile - read and edit it (name/age/gender/city/avatar).
+      summary: Update current buyer
+      tags:
+      - customers-auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBuyerUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBuyerUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBuyerUpdateRequest'
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyerMe'
+          description: ''
+  /api/v1/customers/orders/:
+    post:
+      operationId: customers_orders_create
+      description: |-
+        Buyer side: checkout (create), browse own order history, and cancel an
+        order while it's still pending_confirmation. Any other status change is
+        store-admin only (see orders/viewsets.py).
+      tags:
+      - customers-orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerOrderCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerOrderCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CustomerOrderCreateRequest'
+        required: true
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreOrder'
+          description: ''
+  /api/v1/customers/orders/{id}/:
+    get:
+      operationId: customers_orders_retrieve
+      description: |-
+        Buyer side: checkout (create), browse own order history, and cancel an
+        order while it's still pending_confirmation. Any other status change is
+        store-admin only (see orders/viewsets.py).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store order.
+        required: true
+      tags:
+      - customers-orders
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreOrder'
+          description: ''
+    patch:
+      operationId: customers_orders_partial_update
+      description: |-
+        Buyer side: checkout (create), browse own order history, and cancel an
+        order while it's still pending_confirmation. Any other status change is
+        store-admin only (see orders/viewsets.py).
+      summary: Cancel order (buyer, pending_confirmation only)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store order.
+        required: true
+      tags:
+      - customers-orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerOrderCancelRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerOrderCancelRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCustomerOrderCancelRequest'
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreOrder'
+          description: ''
+  /api/v1/customers/orders/get-all/:
+    post:
+      operationId: customers_orders_get_all_create
+      description: |-
+        Buyer side: checkout (create), browse own order history, and cancel an
+        order while it's still pending_confirmation. Any other status change is
+        store-admin only (see orders/viewsets.py).
+      summary: List (filterable)
+      tags:
+      - customers-orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    status: pending_confirmation
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - BuyerBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreOrder'
+          description: ''
+  /api/v1/customers/refresh:
+    post:
+      operationId: customers_refresh_create
+      summary: Buyer token refresh
+      tags:
+      - customers-auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefreshRequestRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+          description: ''
+  /api/v1/public/news/{id}/:
+    get:
+      operationId: public_news_retrieve
+      description: |-
+        Unauthenticated marketplace browsing - only news that is currently
+        "live": status=active (excludes draft/archived), the current moment
+        falls inside [starts_at, ends_at], and the owning store is active.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store news.
+        required: true
+      tags:
+      - public-news
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicStoreNews'
+          description: ''
+  /api/v1/public/news/get-all/:
+    post:
+      operationId: public_news_get_all_create
+      description: |-
+        Unauthenticated marketplace browsing - only news that is currently
+        "live": status=active (excludes draft/archived), the current moment
+        falls inside [starts_at, ends_at], and the owning store is active.
+      summary: List (filterable)
+      tags:
+      - public-news
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    store: 1
+                    title: Скидки к сезону
+                    news_type: discount
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicStoreNews'
+          description: ''
+  /api/v1/public/products/{id}/:
+    get:
+      operationId: public_products_retrieve
+      description: |-
+        Unauthenticated marketplace browsing - only products belonging to an
+        active store are visible. BuyerJWTAuthentication is attached (with
+        AllowAny) so a buyer token is recognized when present but never
+        required - anonymous browsing still works, it's just the view-count
+        increment on retrieve that needs to know who's asking.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product.
+        required: true
+      tags:
+      - public-products
+      security:
+      - BuyerBearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProduct'
+          description: ''
+  /api/v1/public/products/get-all/:
+    post:
+      operationId: public_products_get_all_create
+      description: |-
+        Unauthenticated marketplace browsing - only products belonging to an
+        active store are visible. BuyerJWTAuthentication is attached (with
+        AllowAny) so a buyer token is recognized when present but never
+        required - anonymous browsing still works, it's just the view-count
+        increment on retrieve that needs to know who's asking.
+      summary: List (filterable)
+      tags:
+      - public-products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    store: 1
+                    name: Платье
+                    category: 1
+                    subcategory: 2
+                    brand: Zara
+                    manufacture: Италия
+                    materials:
+                    - 1
+                    - 2
+                    tags:
+                    - 1
+                    - 2
+                    color: 3
+                    size:
+                      gte: 40
+                      lte: 46
+                    price_sale:
+                      gte: '1000.00'
+                      lte: '20000.00'
+                    price_rental:
+                      gte: '0.00'
+                    price_tailoring:
+                      gte: '0.00'
+                    is_sellable: true
+                    is_rentable: false
+                    blur_image_in_site: false
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - BuyerBearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicProduct'
+          description: ''
+  /api/v1/public/stores/{id}/:
+    get:
+      operationId: public_stores_retrieve
+      description: Unauthenticated marketplace browsing - only active stores are visible.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store.
+        required: true
+      tags:
+      - public-stores
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicStoreDetail'
+          description: ''
+  /api/v1/public/stores/get-all/:
+    post:
+      operationId: public_stores_get_all_create
+      description: Unauthenticated marketplace browsing - only active stores are visible.
+      summary: List (filterable)
+      tags:
+      - public-stores
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: Birid virid
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicStore'
+          description: ''
+  /api/v1/stores/addresses/:
+    post:
+      operationId: stores_addresses_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreAddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreAddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreAddressRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreAddress'
+          description: ''
+  /api/v1/stores/addresses/{id}/:
+    get:
+      operationId: stores_addresses_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store address.
+        required: true
+      tags:
+      - stores-addresses
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreAddress'
+          description: ''
+    patch:
+      operationId: stores_addresses_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store address.
+        required: true
+      tags:
+      - stores-addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreAddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreAddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreAddressRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreAddress'
+          description: ''
+    delete:
+      operationId: stores_addresses_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store address.
+        required: true
+      tags:
+      - stores-addresses
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/addresses/get-all/:
+    post:
+      operationId: stores_addresses_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: Главный офис
+                    address: ул. Ленина, 1
+                    landmark: рядом с ТЦ Атриум
+                    working_hours: 09:00-21:00
+                    phone: '+79990001122'
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreAddress'
+          description: ''
+  /api/v1/stores/categories/:
+    post:
+      operationId: stores_categories_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreCategoryRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreCategory'
+          description: ''
+  /api/v1/stores/categories/{id}/:
+    get:
+      operationId: stores_categories_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store category.
+        required: true
+      tags:
+      - stores-categories
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreCategory'
+          description: ''
+    patch:
+      operationId: stores_categories_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store category.
+        required: true
+      tags:
+      - stores-categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreCategoryRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreCategory'
+          description: ''
+    delete:
+      operationId: stores_categories_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store category.
+        required: true
+      tags:
+      - stores-categories
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/categories/get-all/:
+    post:
+      operationId: stores_categories_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: Платья
+                    parent: 1
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreCategory'
+          description: ''
+  /api/v1/stores/colors/:
+    post:
+      operationId: stores_colors_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-colors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreColorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreColorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreColorRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreColor'
+          description: ''
+  /api/v1/stores/colors/{id}/:
+    get:
+      operationId: stores_colors_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store color.
+        required: true
+      tags:
+      - stores-colors
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreColor'
+          description: ''
+    patch:
+      operationId: stores_colors_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store color.
+        required: true
+      tags:
+      - stores-colors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreColorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreColorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreColorRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreColor'
+          description: ''
+    delete:
+      operationId: stores_colors_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store color.
+        required: true
+      tags:
+      - stores-colors
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/colors/get-all/:
+    post:
+      operationId: stores_colors_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-colors
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: Красный
+                    hex_code: '#FF0000'
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreColor'
+          description: ''
+  /api/v1/stores/contacts/:
+    post:
+      operationId: stores_contacts_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-contacts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreContactRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreContactRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreContactRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreContact'
+          description: ''
+  /api/v1/stores/contacts/{id}/:
+    get:
+      operationId: stores_contacts_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store contact.
+        required: true
+      tags:
+      - stores-contacts
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreContact'
+          description: ''
+    patch:
+      operationId: stores_contacts_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store contact.
+        required: true
+      tags:
+      - stores-contacts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreContactRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreContactRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreContactRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreContact'
+          description: ''
+    delete:
+      operationId: stores_contacts_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store contact.
+        required: true
+      tags:
+      - stores-contacts
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/contacts/get-all/:
+    post:
+      operationId: stores_contacts_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-contacts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: Иван
+                    role: Менеджер
+                    phone: '+79990001122'
+                    telegram: '@ivan'
+                    has_telegram: true
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreContact'
+          description: ''
+  /api/v1/stores/discounts/:
+    post:
+      operationId: stores_discounts_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-discounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreDiscountRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreDiscountRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreDiscountRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreDiscount'
+          description: ''
+  /api/v1/stores/discounts/{id}/:
+    get:
+      operationId: stores_discounts_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store discount.
+        required: true
+      tags:
+      - stores-discounts
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreDiscount'
+          description: ''
+    patch:
+      operationId: stores_discounts_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store discount.
+        required: true
+      tags:
+      - stores-discounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreDiscountRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreDiscountRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreDiscountRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreDiscount'
+          description: ''
+    delete:
+      operationId: stores_discounts_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store discount.
+        required: true
+      tags:
+      - stores-discounts
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/discounts/get-all/:
+    post:
+      operationId: stores_discounts_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-discounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    title: Осенняя скидка
+                    starts_at:
+                      gte: '2026-10-01T00:00:00Z'
+                    ends_at:
+                      lte: '2026-10-31T23:59:59Z'
+                    status: active
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreDiscount'
+          description: ''
+  /api/v1/stores/icons/:
+    post:
+      operationId: stores_icons_create
+      description: |-
+        Global catalog (not store-scoped - no `store` field on Icon). Any
+        authenticated store admin can browse and manage it, since there is no
+        separate platform-admin principal in this project yet.
+      tags:
+      - stores-icons
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IconRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IconRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IconRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Icon'
+          description: ''
+  /api/v1/stores/icons/{id}/:
+    get:
+      operationId: stores_icons_retrieve
+      description: |-
+        Global catalog (not store-scoped - no `store` field on Icon). Any
+        authenticated store admin can browse and manage it, since there is no
+        separate platform-admin principal in this project yet.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this icon.
+        required: true
+      tags:
+      - stores-icons
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Icon'
+          description: ''
+    patch:
+      operationId: stores_icons_partial_update
+      description: |-
+        Global catalog (not store-scoped - no `store` field on Icon). Any
+        authenticated store admin can browse and manage it, since there is no
+        separate platform-admin principal in this project yet.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this icon.
+        required: true
+      tags:
+      - stores-icons
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIconRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIconRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIconRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Icon'
+          description: ''
+    delete:
+      operationId: stores_icons_destroy
+      description: |-
+        Global catalog (not store-scoped - no `store` field on Icon). Any
+        authenticated store admin can browse and manage it, since there is no
+        separate platform-admin principal in this project yet.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this icon.
+        required: true
+      tags:
+      - stores-icons
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/icons/get-all/:
+    post:
+      operationId: stores_icons_get_all_create
+      description: |-
+        Global catalog (not store-scoped - no `store` field on Icon). Any
+        authenticated store admin can browse and manage it, since there is no
+        separate platform-admin principal in this project yet.
+      summary: List (filterable)
+      tags:
+      - stores-icons
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: shirt
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedIcon'
+          description: ''
+  /api/v1/stores/login:
+    post:
+      operationId: stores_login_create
+      summary: Store admin login
+      tags:
+      - stores-auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequestRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+          description: ''
+  /api/v1/stores/me:
+    get:
+      operationId: stores_me_retrieve
+      summary: Current store admin
+      tags:
+      - stores-auth
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreAdminMe'
+          description: ''
+  /api/v1/stores/news/:
+    post:
+      operationId: stores_news_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-news
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreNewsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreNewsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreNewsRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreNews'
+          description: ''
+  /api/v1/stores/news/{id}/:
+    get:
+      operationId: stores_news_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store news.
+        required: true
+      tags:
+      - stores-news
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreNews'
+          description: ''
+    patch:
+      operationId: stores_news_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store news.
+        required: true
+      tags:
+      - stores-news
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreNewsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreNewsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreNewsRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreNews'
+          description: ''
+    delete:
+      operationId: stores_news_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store news.
+        required: true
+      tags:
+      - stores-news
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/news/get-all/:
+    post:
+      operationId: stores_news_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-news
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    title: Скидки к сезону
+                    news_type: discount
+                    status: active
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreNews'
+          description: ''
+  /api/v1/stores/orders/{id}/:
+    get:
+      operationId: stores_orders_retrieve
+      description: |-
+        Store-admin side: browse own store's orders and move `status` forward
+        (PATCH; see ALLOWED_STATUS_TRANSITIONS in orders/models.py). No create -
+        orders come from a buyer's checkout (see orders/customer_viewsets.py) -
+        and no delete, a placed order is never removed, only cancelled.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store order.
+        required: true
+      tags:
+      - stores-orders
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreOrder'
+          description: ''
+    patch:
+      operationId: stores_orders_partial_update
+      description: |-
+        Store-admin side: browse own store's orders and move `status` forward
+        (PATCH; see ALLOWED_STATUS_TRANSITIONS in orders/models.py). No create -
+        orders come from a buyer's checkout (see orders/customer_viewsets.py) -
+        and no delete, a placed order is never removed, only cancelled.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store order.
+        required: true
+      tags:
+      - stores-orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreOrderStatusUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreOrderStatusUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreOrderStatusUpdateRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreOrder'
+          description: ''
+  /api/v1/stores/orders/get-all/:
+    post:
+      operationId: stores_orders_get_all_create
+      description: |-
+        Store-admin side: browse own store's orders and move `status` forward
+        (PATCH; see ALLOWED_STATUS_TRANSITIONS in orders/models.py). No create -
+        orders come from a buyer's checkout (see orders/customer_viewsets.py) -
+        and no delete, a placed order is never removed, only cancelled.
+      summary: List (filterable)
+      tags:
+      - stores-orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    status: pending_confirmation
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreOrder'
+          description: ''
+  /api/v1/stores/product-material-categories/:
+    post:
+      operationId: stores_product_material_categories_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-product-material-categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreProductMaterialCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreProductMaterialCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreProductMaterialCategoryRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductMaterialCategory'
+          description: ''
+  /api/v1/stores/product-material-categories/{id}/:
+    get:
+      operationId: stores_product_material_categories_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product material
+          category.
+        required: true
+      tags:
+      - stores-product-material-categories
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductMaterialCategory'
+          description: ''
+    patch:
+      operationId: stores_product_material_categories_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product material
+          category.
+        required: true
+      tags:
+      - stores-product-material-categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductMaterialCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductMaterialCategoryRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductMaterialCategoryRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductMaterialCategory'
+          description: ''
+    delete:
+      operationId: stores_product_material_categories_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product material
+          category.
+        required: true
+      tags:
+      - stores-product-material-categories
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/product-material-categories/get-all/:
+    post:
+      operationId: stores_product_material_categories_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-product-material-categories
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: Натуральные
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreProductMaterialCategory'
+          description: ''
+  /api/v1/stores/product-materials/:
+    post:
+      operationId: stores_product_materials_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-product-materials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreProductMaterialRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreProductMaterialRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreProductMaterialRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductMaterial'
+          description: ''
+  /api/v1/stores/product-materials/{id}/:
+    get:
+      operationId: stores_product_materials_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product material.
+        required: true
+      tags:
+      - stores-product-materials
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductMaterial'
+          description: ''
+    patch:
+      operationId: stores_product_materials_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product material.
+        required: true
+      tags:
+      - stores-product-materials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductMaterialRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductMaterialRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductMaterialRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductMaterial'
+          description: ''
+    delete:
+      operationId: stores_product_materials_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product material.
+        required: true
+      tags:
+      - stores-product-materials
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/product-materials/get-all/:
+    post:
+      operationId: stores_product_materials_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-product-materials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: Хлопок
+                    category: 1
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreProductMaterial'
+          description: ''
+  /api/v1/stores/product-photos/:
+    post:
+      operationId: stores_product_photos_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-product-photos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreProductPhotoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreProductPhotoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreProductPhotoRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductPhoto'
+          description: ''
+  /api/v1/stores/product-photos/{id}/:
+    get:
+      operationId: stores_product_photos_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product photo.
+        required: true
+      tags:
+      - stores-product-photos
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductPhoto'
+          description: ''
+    patch:
+      operationId: stores_product_photos_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product photo.
+        required: true
+      tags:
+      - stores-product-photos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductPhotoRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductPhotoRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductPhotoRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductPhoto'
+          description: ''
+    delete:
+      operationId: stores_product_photos_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product photo.
+        required: true
+      tags:
+      - stores-product-photos
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/product-photos/{id}/download/:
+    get:
+      operationId: stores_product_photos_download_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: Download photo file
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product photo.
+        required: true
+      tags:
+      - stores-product-photos
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /api/v1/stores/product-photos/get-all/:
+    post:
+      operationId: stores_product_photos_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-product-photos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    original_filename: photo.jpg
+                    processing_status: ready
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreProductPhoto'
+          description: ''
+  /api/v1/stores/product-variants/:
+    post:
+      operationId: stores_product_variants_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-product-variants
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreProductVariantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreProductVariantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreProductVariantRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductVariant'
+          description: ''
+  /api/v1/stores/product-variants/{id}/:
+    get:
+      operationId: stores_product_variants_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product variant.
+        required: true
+      tags:
+      - stores-product-variants
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductVariant'
+          description: ''
+    patch:
+      operationId: stores_product_variants_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product variant.
+        required: true
+      tags:
+      - stores-product-variants
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductVariantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductVariantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductVariantRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductVariant'
+          description: ''
+    delete:
+      operationId: stores_product_variants_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product variant.
+        required: true
+      tags:
+      - stores-product-variants
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/product-variants/get-all/:
+    post:
+      operationId: stores_product_variants_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-product-variants
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    product: 5
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreProductVariant'
+          description: ''
+  /api/v1/stores/products/:
+    post:
+      operationId: stores_products_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreProductRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreProductRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreProductRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductResponse'
+          description: ''
+  /api/v1/stores/products/{id}/:
+    get:
+      operationId: stores_products_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product.
+        required: true
+      tags:
+      - stores-products
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductResponse'
+          description: ''
+    patch:
+      operationId: stores_products_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product.
+        required: true
+      tags:
+      - stores-products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreProductRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreProductResponse'
+          description: ''
+    delete:
+      operationId: stores_products_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store product.
+        required: true
+      tags:
+      - stores-products
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/products/get-all/:
+    post:
+      operationId: stores_products_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: Платье
+                    category: 1
+                    subcategory: 2
+                    brand: Zara
+                    manufacture: Италия
+                    materials:
+                    - 1
+                    - 2
+                    tags:
+                    - 1
+                    - 2
+                    color: 3
+                    size:
+                      gte: 40
+                      lte: 46
+                    price_sale:
+                      gte: '1000.00'
+                      lte: '20000.00'
+                    price_rental:
+                      gte: '0.00'
+                    price_tailoring:
+                      gte: '0.00'
+                    is_sellable: true
+                    is_rentable: false
+                    blur_image_in_site: false
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreProductResponse'
+          description: ''
+  /api/v1/stores/refresh:
+    post:
+      operationId: stores_refresh_create
+      summary: Store admin token refresh
+      tags:
+      - stores-auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefreshRequestRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+          description: ''
+  /api/v1/stores/reports/most-favorited-products:
+    post:
+      operationId: stores_reports_most_favorited_products_create
+      description: 'Products ranked by number of buyers who favorited them within
+        [from_date, to_date] (default: last 30 days).'
+      summary: Most favorited products
+      tags:
+      - stores-reports
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPeriodRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  from_date: '2026-08-22'
+                  to_date: '2026-09-21'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportPeriodRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportPeriodRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductFavoriteReportItem'
+          description: ''
+  /api/v1/stores/reports/most-popular-categories:
+    post:
+      operationId: stores_reports_most_popular_categories_create
+      description: |-
+        Categories ranked by total views of their directly-assigned products
+        within [from_date, to_date] (default: last 30 days). Only counts a
+        product toward its `category`, not a category it's used as `subcategory`
+        for - a subcategory accrues its own views the same way.
+      summary: Most popular categories
+      tags:
+      - stores-reports
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPeriodRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  from_date: '2026-08-22'
+                  to_date: '2026-09-21'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportPeriodRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportPeriodRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoryReportItem'
+          description: ''
+  /api/v1/stores/reports/most-viewed-products:
+    post:
+      operationId: stores_reports_most_viewed_products_create
+      description: 'Products ranked by number of authenticated-buyer views within
+        [from_date, to_date] (default: last 30 days).'
+      summary: Most viewed products
+      tags:
+      - stores-reports
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportPeriodRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  from_date: '2026-08-22'
+                  to_date: '2026-09-21'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReportPeriodRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReportPeriodRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductViewReportItem'
+          description: ''
+  /api/v1/stores/reports/summary:
+    get:
+      operationId: stores_reports_summary_retrieve
+      description: Current store's totals - products, categories, and how many products
+        have been viewed at least once.
+      summary: Store totals
+      tags:
+      - stores-reports
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreReportSummary'
+          description: ''
+  /api/v1/stores/services/:
+    post:
+      operationId: stores_services_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreServiceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreServiceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreServiceRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreService'
+          description: ''
+  /api/v1/stores/services/{id}/:
+    get:
+      operationId: stores_services_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store service.
+        required: true
+      tags:
+      - stores-services
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreService'
+          description: ''
+    patch:
+      operationId: stores_services_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store service.
+        required: true
+      tags:
+      - stores-services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreServiceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreServiceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreServiceRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreService'
+          description: ''
+    delete:
+      operationId: stores_services_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store service.
+        required: true
+      tags:
+      - stores-services
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/services/get-all/:
+    post:
+      operationId: stores_services_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    title: Пошив
+                    icon: 1
+                    kicker: Быстро
+                    visible: true
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreService'
+          description: ''
+  /api/v1/stores/social-links/:
+    post:
+      operationId: stores_social_links_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-social-links
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreSocialLinkRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreSocialLinkRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreSocialLinkRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreSocialLink'
+          description: ''
+  /api/v1/stores/social-links/{id}/:
+    get:
+      operationId: stores_social_links_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store social link.
+        required: true
+      tags:
+      - stores-social-links
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreSocialLink'
+          description: ''
+    patch:
+      operationId: stores_social_links_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store social link.
+        required: true
+      tags:
+      - stores-social-links
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreSocialLinkRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreSocialLinkRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreSocialLinkRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreSocialLink'
+          description: ''
+    delete:
+      operationId: stores_social_links_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store social link.
+        required: true
+      tags:
+      - stores-social-links
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/social-links/get-all/:
+    post:
+      operationId: stores_social_links_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-social-links
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    platform: instagram
+                    nickname: store1_ig
+                    visible: true
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreSocialLink'
+          description: ''
+  /api/v1/stores/store:
+    get:
+      operationId: stores_store_retrieve
+      description: Current store admin's own store - read and edit its 4 editable
+        fields.
+      summary: Current store
+      tags:
+      - stores-store
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Store'
+          description: ''
+    patch:
+      operationId: stores_store_partial_update
+      description: Current store admin's own store - read and edit its 4 editable
+        fields.
+      summary: Update current store
+      tags:
+      - stores-store
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreUpdateRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Store'
+          description: ''
+  /api/v1/stores/tags/:
+    post:
+      operationId: stores_tags_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      tags:
+      - stores-tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreTagRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StoreTagRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StoreTagRequest'
+        required: true
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreTag'
+          description: ''
+  /api/v1/stores/tags/{id}/:
+    get:
+      operationId: stores_tags_retrieve
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store tag.
+        required: true
+      tags:
+      - stores-tags
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreTag'
+          description: ''
+    patch:
+      operationId: stores_tags_partial_update
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store tag.
+        required: true
+      tags:
+      - stores-tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreTagRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreTagRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStoreTagRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreTag'
+          description: ''
+    delete:
+      operationId: stores_tags_destroy
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this store tag.
+        required: true
+      tags:
+      - stores-tags
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/stores/tags/get-all/:
+    post:
+      operationId: stores_tags_get_all_create
+      description: |-
+        CRUD scoped to the authenticated store admin's own store. `store` is never
+        read from the request body/URL - only from the JWT-resolved account - so
+        one store's admin can never read, edit, or delete another store's rows,
+        and a foreign id 404s instead of leaking existence.
+      summary: List (filterable)
+      tags:
+      - stores-tags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+            examples:
+              Example:
+                value:
+                  page: 1
+                  pageSize: 20
+                  filters:
+                    name: Новинка
+                    created_at:
+                      eq: '2026-09-21'
+                      gt: '2026-01-01'
+                      gte: '2026-01-01'
+                      lt: '2026-12-31'
+                      lte: '2026-12-31'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GetAllRequestRequest'
+      security:
+      - StoreAdminBearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStoreTag'
+          description: ''
+components:
+  schemas:
+    BlankEnum:
+      enum:
+      - ''
+    BuyerMe:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        login:
+          type: string
+          maxLength: 255
+        active:
+          type: boolean
+        last_name:
+          type: string
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        middle_name:
+          type: string
+          maxLength: 150
+        age:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        city:
+          type: string
+          maxLength: 150
+        avatar_photo:
+          type: string
+          format: uri
+          nullable: true
+        avatar_photo_processed:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        avatar_processing_status:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/PhotoProcessingStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - avatar_photo_processed
+      - created_at
+      - first_name
+      - id
+      - last_name
+      - login
+      - updated_at
+    CancellationReasonEnum:
+      enum:
+      - changed_mind
+      - found_better_price
+      - ordered_by_mistake
+      - delivery_too_slow
+      - out_of_stock
+      - cannot_fulfill
+      - buyer_unreachable
+      - suspected_fraud
+      - other
+      type: string
+      description: |-
+        * `changed_mind` - Buyer changed their mind
+        * `found_better_price` - Found a better price elsewhere
+        * `ordered_by_mistake` - Ordered by mistake
+        * `delivery_too_slow` - Delivery is taking too long
+        * `out_of_stock` - Product out of stock
+        * `cannot_fulfill` - Store cannot fulfill the order
+        * `buyer_unreachable` - Could not reach the buyer
+        * `suspected_fraud` - Suspected fraudulent order
+        * `other` - Other
+    CancelledByEnum:
+      enum:
+      - buyer
+      - store
+      type: string
+      description: |-
+        * `buyer` - Buyer
+        * `store` - Store
+    CategoryReportItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        parent:
+          type: integer
+          nullable: true
+        view_count:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - name
+      - view_count
+    ContentStatusEnum:
+      enum:
+      - draft
+      - active
+      - archived
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `active` - Active
+        * `archived` - Archived
+    CustomerOrderCreateRequest:
+      type: object
+      description: |-
+        Checkout: the frontend's cart (never stored server-side) is split by
+        store before calling this - each call creates exactly one StoreOrder,
+        for exactly one store, from a list of {product, quantity, price_type}.
+      properties:
+        store:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemCreateRequest'
+      required:
+      - items
+      - store
+    DiscountProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product:
+          type: integer
+        discount_type:
+          $ref: '#/components/schemas/DiscountTypeEnum'
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - discount_type
+      - id
+      - product
+      - updated_at
+      - value
+    DiscountProductRequest:
+      type: object
+      properties:
+        product:
+          type: integer
+        discount_type:
+          $ref: '#/components/schemas/DiscountTypeEnum'
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+      required:
+      - discount_type
+      - product
+      - value
+    DiscountTypeEnum:
+      enum:
+      - fixed_amount
+      - percentage
+      type: string
+      description: |-
+        * `fixed_amount` - Fixed amount
+        * `percentage` - Percentage
+    FavoriteProduct:
+      type: object
+      description: Summary shape for a buyer's favorited products - not the full store-admin
+        product serializer.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        store:
+          type: integer
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        category:
+          type: integer
+        price_sale:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_rental:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        is_sellable:
+          type: boolean
+        is_rentable:
+          type: boolean
+      required:
+      - category
+      - id
+      - name
+      - slug
+      - store
+    GenderEnum:
+      enum:
+      - male
+      - female
+      type: string
+      description: |-
+        * `male` - Male
+        * `female` - Female
+    GetAllRequestRequest:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+        pageSize:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+        filters:
+          description: '{field: value} for exact/icontains match, {field: [v1, v2]}
+            for IN, {field: {"eq"|"gt"|"gte"|"lt"|"lte": value}} for comparisons.
+            created_at/updated_at compare by calendar date only (time-of-day is ignored).
+            Allowed fields are per-resource - see each model''s ALLOWED_FILTERS.'
+    Icon:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+      required:
+      - id
+      - name
+    IconRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - name
+    LoginRequestRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - login
+      - password
+    NewsTypeEnum:
+      enum:
+      - event
+      - discount
+      - holiday
+      - other
+      type: string
+      description: |-
+        * `event` - Event
+        * `discount` - Discount
+        * `holiday` - Holiday
+        * `other` - Other
+    NullEnum:
+      enum:
+      - null
+    OrderItemCreateRequest:
+      type: object
+      properties:
+        product:
+          type: integer
+        quantity:
+          type: integer
+          minimum: 1
+        price_type:
+          $ref: '#/components/schemas/PriceTypeEnum'
+      required:
+      - price_type
+      - product
+      - quantity
+    OrderStatusEnum:
+      enum:
+      - pending_confirmation
+      - confirmed
+      - delivered
+      - closed
+      - cancelled
+      - returned
+      type: string
+      description: |-
+        * `pending_confirmation` - Pending confirmation
+        * `confirmed` - Confirmed
+        * `delivered` - Delivered
+        * `closed` - Closed
+        * `cancelled` - Cancelled
+        * `returned` - Returned
+    PageRequestRequest:
+      type: object
+      description: page/pageSize only - for body-driven list endpoints with no filtering
+        support.
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+        pageSize:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+    PaginatedCategoryReportItem:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryReportItem'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedFavoriteProduct:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteProduct'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedIcon:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Icon'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedProductFavoriteReportItem:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductFavoriteReportItem'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedProductViewReportItem:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductViewReportItem'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedPublicProduct:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProduct'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedPublicStore:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicStore'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedPublicStoreNews:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicStoreNews'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStore:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Store'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreAddress:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreAddress'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreCategory:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreCategory'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreColor:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreColor'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreContact:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreContact'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreDiscount:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreDiscount'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreNews:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreNews'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreOrder:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreOrder'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreProductMaterial:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreProductMaterial'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreProductMaterialCategory:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreProductMaterialCategory'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreProductPhoto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreProductPhoto'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreProductResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreProductResponse'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreProductVariant:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreProductVariant'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreService:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreService'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreSocialLink:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreSocialLink'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PaginatedStoreTag:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreTag'
+        page:
+          type: integer
+        totalPages:
+          type: integer
+        total:
+          type: integer
+      required:
+      - items
+      - page
+      - total
+      - totalPages
+    PatchedBuyerUpdateRequest:
+      type: object
+      properties:
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        middle_name:
+          type: string
+          maxLength: 150
+        age:
+          type: integer
+          maximum: 32767
+          minimum: 0
+          nullable: true
+        gender:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GenderEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        city:
+          type: string
+          maxLength: 150
+        avatar_photo:
+          type: string
+          format: binary
+          nullable: true
+    PatchedCustomerOrderCancelRequest:
+      type: object
+      description: |-
+        PATCH .../customers/orders/{id}/ - a buyer may only cancel their own
+        order, and only while it's still pending_confirmation (once the store
+        has confirmed it, only the store can cancel - see
+        StoreOrderStatusUpdateSerializer). No `status` field - cancelling is the
+        only thing this endpoint does, so it's implied rather than passed in;
+        the view sets status=cancelled and cancelled_by="buyer" via
+        serializer.save(...).
+      properties:
+        cancellation_reason:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/CancellationReasonEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+    PatchedIconRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+    PatchedStoreAddressRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        address:
+          type: string
+          minLength: 1
+          maxLength: 500
+        landmark:
+          type: string
+          maxLength: 255
+        working_hours:
+          type: string
+          maxLength: 255
+        phone:
+          type: string
+          maxLength: 32
+    PatchedStoreCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        parent:
+          type: integer
+          nullable: true
+        cover:
+          type: string
+          format: binary
+          nullable: true
+    PatchedStoreColorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        hex_code:
+          type: string
+          minLength: 1
+          pattern: ^#(?:[0-9a-fA-F]{3}){1,2}$
+          maxLength: 7
+    PatchedStoreContactRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        role:
+          type: string
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 32
+        hours:
+          type: string
+          maxLength: 255
+        telegram:
+          type: string
+          maxLength: 150
+        has_telegram:
+          type: boolean
+    PatchedStoreDiscountRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/ContentStatusEnum'
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscountProductRequest'
+    PatchedStoreNewsRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        news_type:
+          $ref: '#/components/schemas/NewsTypeEnum'
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/ContentStatusEnum'
+        products:
+          type: array
+          items:
+            type: integer
+    PatchedStoreOrderStatusUpdateRequest:
+      type: object
+      description: |-
+        PATCH .../stores/orders/{id}/ - only `status` (+ `cancellation_reason`
+        when cancelling) is writable, and only along ALLOWED_STATUS_TRANSITIONS.
+        `cancelled_by` isn't a field here - the view sets it to "store" via
+        serializer.save(cancelled_by=...) since it's implied by which endpoint
+        this is, not something the caller should be able to pick.
+      properties:
+        status:
+          $ref: '#/components/schemas/OrderStatusEnum'
+        cancellation_reason:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/CancellationReasonEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+    PatchedStoreProductMaterialCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+    PatchedStoreProductMaterialRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        category:
+          type: integer
+          nullable: true
+    PatchedStoreProductPhotoRequest:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+    PatchedStoreProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        category:
+          type: integer
+        subcategory:
+          type: integer
+          nullable: true
+        description:
+          type: string
+        brand:
+          type: string
+          maxLength: 255
+        manufacture:
+          type: string
+          maxLength: 255
+        material_ids:
+          type: array
+          items:
+            type: integer
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        tags:
+          type: array
+          items:
+            type: integer
+        color:
+          type: integer
+          nullable: true
+        size:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        price_sale:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_rental:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_tailoring:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        is_sellable:
+          type: boolean
+        is_rentable:
+          type: boolean
+        blur_image_in_site:
+          type: boolean
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariantWriteRequest'
+          writeOnly: true
+    PatchedStoreProductVariantRequest:
+      type: object
+      properties:
+        product:
+          type: integer
+        photos:
+          type: array
+          items:
+            type: integer
+    PatchedStoreServiceRequest:
+      type: object
+      properties:
+        icon:
+          type: integer
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        kicker:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        visible:
+          type: boolean
+    PatchedStoreSocialLinkRequest:
+      type: object
+      properties:
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        nickname:
+          type: string
+          maxLength: 150
+        url:
+          type: string
+          format: uri
+          minLength: 1
+          maxLength: 200
+        visible:
+          type: boolean
+    PatchedStoreTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+    PatchedStoreUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        phone:
+          type: string
+          maxLength: 32
+        email:
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+    PhotoProcessingStatusEnum:
+      enum:
+      - pending
+      - ready
+      - failed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `ready` - Ready
+        * `failed` - Failed
+    PhotoRendition:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        quality:
+          $ref: '#/components/schemas/QualityEnum'
+        image:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - image
+      - quality
+    PhotoRenditionRequest:
+      type: object
+      properties:
+        quality:
+          $ref: '#/components/schemas/QualityEnum'
+        image:
+          type: string
+          format: binary
+      required:
+      - image
+      - quality
+    PlatformEnum:
+      enum:
+      - instagram
+      - telegram
+      - whatsapp
+      - vk
+      - tiktok
+      - youtube
+      - facebook
+      - other
+      type: string
+      description: |-
+        * `instagram` - Instagram
+        * `telegram` - Telegram
+        * `whatsapp` - WhatsApp
+        * `vk` - VK
+        * `tiktok` - TikTok
+        * `youtube` - YouTube
+        * `facebook` - Facebook
+        * `other` - Other
+    PriceTypeEnum:
+      enum:
+      - sale
+      - rental
+      - tailoring
+      type: string
+      description: |-
+        * `sale` - Sale
+        * `rental` - Rental
+        * `tailoring` - Tailoring
+    ProductFavoriteReportItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        category:
+          type: integer
+        price_sale:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_rental:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        favorite_count:
+          type: integer
+          readOnly: true
+      required:
+      - category
+      - favorite_count
+      - id
+      - name
+      - slug
+    ProductVariantRead:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreProductPhoto'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - photos
+      - updated_at
+    ProductVariantWriteRequest:
+      type: object
+      description: Nested under StoreProductSerializer - no `product` field, it's
+        implied by the parent.
+      properties:
+        photos:
+          type: array
+          items:
+            type: integer
+    ProductViewReportItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        category:
+          type: integer
+        price_sale:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_rental:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        view_count:
+          type: integer
+          readOnly: true
+      required:
+      - category
+      - id
+      - name
+      - slug
+      - view_count
+    PublicProduct:
+      type: object
+      description: Unauthenticated storefront view of a product - read-only, so `variants`
+        can just be its real read shape directly.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        store:
+          type: integer
+        name:
+          type: string
+          maxLength: 255
+        category:
+          type: integer
+        subcategory:
+          type: integer
+          nullable: true
+        description:
+          type: string
+        brand:
+          type: string
+          maxLength: 255
+        manufacture:
+          type: string
+          maxLength: 255
+        material_ids:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        tags:
+          type: array
+          items:
+            type: integer
+        color:
+          type: integer
+          nullable: true
+        size:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        price_sale:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_rental:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_tailoring:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        is_sellable:
+          type: boolean
+        is_rentable:
+          type: boolean
+        blur_image_in_site:
+          type: boolean
+        views:
+          type: integer
+          readOnly: true
+        in_customers_saved:
+          type: integer
+          readOnly: true
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariantRead'
+          readOnly: true
+        discounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProductDiscount'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - created_at
+      - discounts
+      - id
+      - in_customers_saved
+      - material_ids
+      - name
+      - slug
+      - store
+      - updated_at
+      - variants
+      - views
+    PublicProductDiscount:
+      type: object
+      description: |-
+        A currently-active discount applied to one product, from the buyer's
+        point of view - discount_type/value are per-product (see
+        StoreDiscountProduct), the rest comes from the parent StoreDiscount.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        discount:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        discount_type:
+          $ref: '#/components/schemas/DiscountTypeEnum'
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+      required:
+      - description
+      - discount
+      - discount_type
+      - ends_at
+      - id
+      - starts_at
+      - title
+      - value
+    PublicStore:
+      type: object
+      description: |-
+        Unauthenticated storefront view of a Store. social_links/services are
+        filtered to visible=True - that flag exists specifically to let a store
+        admin hide an entry from the public page while keeping it around in
+        their own admin panel. addresses/contacts have no such flag, so all of
+        them are shown as-is.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        phone:
+          type: string
+          maxLength: 32
+        email:
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        social_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreSocialLink'
+          readOnly: true
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreAddress'
+          readOnly: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreContact'
+          readOnly: true
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreService'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - addresses
+      - contacts
+      - created_at
+      - id
+      - name
+      - services
+      - social_links
+      - updated_at
+    PublicStoreDetail:
+      type: object
+      description: |-
+        Single-store public view - adds aggregate counts that only make sense
+        (and are only worth the extra queries) for one store at a time, not the
+        whole get-all list. `categories`/`subcategories` are both StoreCategory
+        rows (products.models) - a subcategory is just one with `parent` set.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        phone:
+          type: string
+          maxLength: 32
+        email:
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        social_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreSocialLink'
+          readOnly: true
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreAddress'
+          readOnly: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreContact'
+          readOnly: true
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreService'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        total_products:
+          type: integer
+          readOnly: true
+        total_categories:
+          type: integer
+          readOnly: true
+        total_subcategories:
+          type: integer
+          readOnly: true
+      required:
+      - addresses
+      - contacts
+      - created_at
+      - id
+      - name
+      - services
+      - social_links
+      - total_categories
+      - total_products
+      - total_subcategories
+      - updated_at
+    PublicStoreNews:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        store:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        news_type:
+          $ref: '#/components/schemas/NewsTypeEnum'
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/ContentStatusEnum'
+        products:
+          type: array
+          items:
+            type: integer
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - ends_at
+      - id
+      - news_type
+      - slug
+      - starts_at
+      - store
+      - title
+      - updated_at
+    QualityEnum:
+      enum:
+      - large
+      - medium
+      - small
+      type: string
+      description: |-
+        * `large` - Large (1080p, WebP)
+        * `medium` - Medium (720p, WebP)
+        * `small` - Small (320p, WebP)
+    RefreshRequestRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+      required:
+      - refreshToken
+    ReportPeriodRequestRequest:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+        pageSize:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+        from_date:
+          type: string
+          format: date
+          description: Defaults to 30 days before to_date.
+        to_date:
+          type: string
+          format: date
+          description: Defaults to today.
+    Store:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        phone:
+          type: string
+          maxLength: 32
+        email:
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    StoreAddress:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        address:
+          type: string
+          maxLength: 500
+        landmark:
+          type: string
+          maxLength: 255
+        working_hours:
+          type: string
+          maxLength: 255
+        phone:
+          type: string
+          maxLength: 32
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - created_at
+      - id
+      - name
+      - updated_at
+    StoreAddressRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        address:
+          type: string
+          minLength: 1
+          maxLength: 500
+        landmark:
+          type: string
+          maxLength: 255
+        working_hours:
+          type: string
+          maxLength: 255
+        phone:
+          type: string
+          maxLength: 32
+      required:
+      - address
+      - name
+    StoreAdminMe:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        login:
+          type: string
+          maxLength: 255
+        active:
+          type: boolean
+        store:
+          allOf:
+          - $ref: '#/components/schemas/Store'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - login
+      - store
+      - updated_at
+    StoreCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        parent:
+          type: integer
+          nullable: true
+        cover:
+          type: string
+          format: uri
+          nullable: true
+        cover_processed:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        cover_processing_status:
+          readOnly: true
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/PhotoProcessingStatusEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - cover_processed
+      - cover_processing_status
+      - created_at
+      - id
+      - name
+      - updated_at
+    StoreCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        parent:
+          type: integer
+          nullable: true
+        cover:
+          type: string
+          format: binary
+          nullable: true
+      required:
+      - name
+    StoreColor:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        hex_code:
+          type: string
+          pattern: ^#(?:[0-9a-fA-F]{3}){1,2}$
+          maxLength: 7
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - hex_code
+      - id
+      - name
+      - updated_at
+    StoreColorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        hex_code:
+          type: string
+          minLength: 1
+          pattern: ^#(?:[0-9a-fA-F]{3}){1,2}$
+          maxLength: 7
+      required:
+      - hex_code
+      - name
+    StoreContact:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 150
+        role:
+          type: string
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 32
+        hours:
+          type: string
+          maxLength: 255
+        telegram:
+          type: string
+          maxLength: 150
+        has_telegram:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    StoreContactRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        role:
+          type: string
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 32
+        hours:
+          type: string
+          maxLength: 255
+        telegram:
+          type: string
+          maxLength: 150
+        has_telegram:
+          type: boolean
+      required:
+      - name
+    StoreDiscount:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/ContentStatusEnum'
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscountProduct'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - title
+      - updated_at
+    StoreDiscountRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/ContentStatusEnum'
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscountProductRequest'
+      required:
+      - title
+    StoreNews:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        news_type:
+          $ref: '#/components/schemas/NewsTypeEnum'
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/ContentStatusEnum'
+        products:
+          type: array
+          items:
+            type: integer
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - ends_at
+      - id
+      - news_type
+      - slug
+      - starts_at
+      - title
+      - updated_at
+    StoreNewsRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        news_type:
+          $ref: '#/components/schemas/NewsTypeEnum'
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/ContentStatusEnum'
+        products:
+          type: array
+          items:
+            type: integer
+      required:
+      - ends_at
+      - news_type
+      - slug
+      - starts_at
+      - title
+    StoreOrder:
+      type: object
+      description: Read shape - identical for both the store-admin side and the buyer
+        side, just two different querysets over it.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        store:
+          type: integer
+        buyer:
+          type: integer
+        status:
+          $ref: '#/components/schemas/OrderStatusEnum'
+        cancelled_by:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/CancelledByEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        cancellation_reason:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/CancellationReasonEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreOrderItem'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - buyer
+      - created_at
+      - id
+      - items
+      - store
+      - updated_at
+    StoreOrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product:
+          type: integer
+          nullable: true
+        product_snapshot: {}
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        price_type:
+          $ref: '#/components/schemas/PriceTypeEnum'
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+        final_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+        applied_discount:
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - base_price
+      - created_at
+      - final_price
+      - id
+      - price_type
+      - product_snapshot
+      - quantity
+      - updated_at
+    StoreProductMaterial:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        category:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    StoreProductMaterialCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    StoreProductMaterialCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+      required:
+      - name
+    StoreProductMaterialRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        category:
+          type: integer
+          nullable: true
+      required:
+      - name
+    StoreProductPhoto:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+        original_filename:
+          type: string
+          readOnly: true
+        processing_status:
+          allOf:
+          - $ref: '#/components/schemas/PhotoProcessingStatusEnum'
+          readOnly: true
+        renditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhotoRendition'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - image
+      - original_filename
+      - processing_status
+      - renditions
+      - updated_at
+    StoreProductPhotoRequest:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+      required:
+      - image
+    StoreProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        category:
+          type: integer
+        subcategory:
+          type: integer
+          nullable: true
+        description:
+          type: string
+        brand:
+          type: string
+          maxLength: 255
+        manufacture:
+          type: string
+          maxLength: 255
+        material_ids:
+          type: array
+          items:
+            type: integer
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        tags:
+          type: array
+          items:
+            type: integer
+        color:
+          type: integer
+          nullable: true
+        size:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        price_sale:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_rental:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_tailoring:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        is_sellable:
+          type: boolean
+        is_rentable:
+          type: boolean
+        blur_image_in_site:
+          type: boolean
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariantWriteRequest'
+          writeOnly: true
+      required:
+      - category
+      - name
+      - slug
+    StoreProductResponse:
+      type: object
+      description: |-
+        Doc-only (never actually instantiated to serialize a response - see
+        products/viewsets.py). StoreProductSerializer.variants is write_only (a
+        plain photo-id list on input) with the real nested-read shape injected by
+        its to_representation() override; drf-spectacular can't see that
+        override statically, so without this it omits `variants` from the
+        response schema entirely. This subclass just redeclares that one field
+        with its actual read shape so the generated schema matches reality.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        category:
+          type: integer
+        subcategory:
+          type: integer
+          nullable: true
+        description:
+          type: string
+        brand:
+          type: string
+          maxLength: 255
+        manufacture:
+          type: string
+          maxLength: 255
+        material_ids:
+          type: array
+          items:
+            type: integer
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        tags:
+          type: array
+          items:
+            type: integer
+        color:
+          type: integer
+          nullable: true
+        size:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        price_sale:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_rental:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        price_tailoring:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,28}(?:\.\d{0,2})?$
+          nullable: true
+        is_sellable:
+          type: boolean
+        is_rentable:
+          type: boolean
+        blur_image_in_site:
+          type: boolean
+        views:
+          type: integer
+          readOnly: true
+        in_customers_saved:
+          type: integer
+          readOnly: true
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariantRead'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - created_at
+      - id
+      - in_customers_saved
+      - name
+      - slug
+      - updated_at
+      - variants
+      - views
+    StoreProductVariant:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product:
+          type: integer
+        photos:
+          type: array
+          items:
+            type: integer
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - product
+      - updated_at
+    StoreProductVariantRequest:
+      type: object
+      properties:
+        product:
+          type: integer
+        photos:
+          type: array
+          items:
+            type: integer
+      required:
+      - product
+    StoreReportSummary:
+      type: object
+      properties:
+        total_products:
+          type: integer
+        total_categories:
+          type: integer
+        total_viewed_products:
+          type: integer
+          description: Sum of `views` across all of the store's products.
+      required:
+      - total_categories
+      - total_products
+      - total_viewed_products
+    StoreService:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        icon:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        kicker:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        visible:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - icon
+      - id
+      - title
+      - updated_at
+    StoreServiceRequest:
+      type: object
+      properties:
+        icon:
+          type: integer
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        kicker:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        visible:
+          type: boolean
+      required:
+      - icon
+      - title
+    StoreSocialLink:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        nickname:
+          type: string
+          maxLength: 150
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+        visible:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - platform
+      - updated_at
+      - url
+    StoreSocialLinkRequest:
+      type: object
+      properties:
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        nickname:
+          type: string
+          maxLength: 150
+        url:
+          type: string
+          format: uri
+          minLength: 1
+          maxLength: 200
+        visible:
+          type: boolean
+      required:
+      - platform
+      - url
+    StoreTag:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    StoreTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+      required:
+      - name
+    TokenPairResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      required:
+      - accessToken
+      - refreshToken
+  securitySchemes:
+    BuyerBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    StoreAdminBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
