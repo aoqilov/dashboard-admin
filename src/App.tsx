@@ -1,25 +1,41 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import { AppLayout } from '@/components/layout/admin/AppLayout'
+import Catalog from '@/pages/admin/Catalog'
 import Categories from '@/pages/admin/Categories'
 import DevUI from '@/pages/admin/DevUI'
 import Discounts from '@/pages/admin/Discounts'
 import Dashboard from '@/pages/admin/main/Dashboard'
 import News from '@/pages/admin/News'
+import ProductForm from '@/pages/admin/ProductForm'
 import Products from '@/pages/admin/Products'
 import Settings from '@/pages/admin/Settings'
 import Store from '@/pages/admin/Store'
 import Login from '@/pages/Login'
+import { matchPath, RouteContext, type RouteState } from '@/router/router'
+import { navigate } from '@/utils/navigate'
+
+interface RouteConfig {
+  /** '/products/:id' kabi parametrli bo'lishi mumkin */
+  path: string
+  page: ComponentType
+  /** sidebar/header'siz, alohida sahifa (login) */
+  public?: boolean
+  /** Sidebar'da qaysi element faol bo'lsin (ichki sahifalar uchun) */
+  nav?: string
+}
 
 /**
- * Router ulanguncha: sidebar'dagi id -> sahifa va URL.
- * id lar sidebarNav.ts bilan mos bo'lishi kerak.
- * public: true — sidebar/header'siz, alohida sahifa (login)
+ * id -> sahifa va URL. Sidebar id lari sidebarNav.ts bilan mos bo'lishi kerak.
+ * Tartib muhim: aniq yo'l ('/products/new') parametrli yo'ldan ('/products/:id') oldin.
  */
-const ROUTES: Record<string, { path: string; page: ComponentType; public?: boolean }> = {
+const ROUTES: Record<string, RouteConfig> = {
   login: { path: '/login', page: Login, public: true },
   overview: { path: '/', page: Dashboard },
   products: { path: '/products', page: Products },
+  'product-new': { path: '/products/new', page: ProductForm, nav: 'products' },
+  'product-edit': { path: '/products/:id', page: ProductForm, nav: 'products' },
   categories: { path: '/categories', page: Categories },
+  catalog: { path: '/catalog', page: Catalog },
   discounts: { path: '/discounts', page: Discounts },
   news: { path: '/news', page: News },
   store: { path: '/store', page: Store },
@@ -27,33 +43,45 @@ const ROUTES: Record<string, { path: string; page: ComponentType; public?: boole
   'ui-kit': { path: '/preview-dev', page: DevUI },
 }
 
-function getIdFromPath(pathname: string) {
-  return Object.keys(ROUTES).find((id) => ROUTES[id].path === pathname) ?? 'overview'
+function resolveRoute() {
+  const { pathname, search } = window.location
+  for (const [id, route] of Object.entries(ROUTES)) {
+    const params = matchPath(route.path, pathname)
+    if (params) return { id, params, search }
+  }
+  return { id: 'overview', params: {}, search }
 }
 
 function App() {
-  const [activeId, setActiveId] = useState(() => getIdFromPath(window.location.pathname))
-  const Page = ROUTES[activeId]?.page ?? Dashboard
+  const [current, setCurrent] = useState(resolveRoute)
+  const route = ROUTES[current.id]
+  const Page = route.page
 
-  // Brauzerning "orqaga / oldinga" tugmalari
+  // Brauzerning "orqaga / oldinga" tugmalari va navigate()
   useEffect(() => {
-    const handlePopState = () => setActiveId(getIdFromPath(window.location.pathname))
+    const handlePopState = () => setCurrent(resolveRoute())
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  const handleNavigate = (id: string) => {
-    const path = ROUTES[id]?.path ?? '/'
-    if (path !== window.location.pathname) window.history.pushState(null, '', path)
-    setActiveId(id)
+  const routeState: RouteState = { params: current.params, search: current.search }
+  // Parametr o'zgarsa (/products/1 -> /products/2) sahifa qaytadan quriladi
+  const pageKey = `${current.id}:${JSON.stringify(current.params)}`
+
+  if (route.public) {
+    return (
+      <RouteContext.Provider value={routeState}>
+        <Page key={pageKey} />
+      </RouteContext.Provider>
+    )
   }
 
-  if (ROUTES[activeId]?.public) return <Page />
-
   return (
-    <AppLayout activeId={activeId} onNavigate={handleNavigate}>
-      <Page />
-    </AppLayout>
+    <RouteContext.Provider value={routeState}>
+      <AppLayout activeId={route.nav ?? current.id} onNavigate={(id) => navigate(ROUTES[id]?.path ?? '/')}>
+        <Page key={pageKey} />
+      </AppLayout>
+    </RouteContext.Provider>
   )
 }
 
