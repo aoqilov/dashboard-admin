@@ -1,4 +1,4 @@
-import { isAxiosError } from 'axios'
+import { getFieldErrors } from '@/api/api-config/apiError'
 import type { StoreProductPhoto } from '@/api/routes/stores-product-photos/storeProductPhotos.types'
 import type { StoreProduct, StoreProductRequest } from '@/api/routes/stores-products/storeProducts.types'
 import { SLUG_PATTERN } from '@/utils/slugify'
@@ -141,16 +141,7 @@ export function toRequest(values: ProductFormValues): StoreProductRequest {
 
 /** DRF maydon xatolari: { slug: ["already exists"] } -> { slug: "already exists" } */
 export function serverFieldErrors(error: unknown): ProductFormErrors {
-  if (!isAxiosError(error) || error.response?.status !== 400) return {}
-  const data: unknown = error.response.data
-  if (!data || typeof data !== 'object') return {}
-
-  const errors: Record<string, string> = {}
-  for (const [key, value] of Object.entries(data)) {
-    const message = Array.isArray(value) ? value[0] : value
-    if (typeof message === 'string') errors[key] = message
-  }
-  return errors as ProductFormErrors
+  return getFieldErrors(error) as ProductFormErrors
 }
 
 /** Forma bo'limlariga beriladigan umumiy props */

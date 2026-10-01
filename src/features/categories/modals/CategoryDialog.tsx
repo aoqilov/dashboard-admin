@@ -8,7 +8,7 @@ import { CusInput } from '@/components/ui/inputs/CusInput'
 import { CusLabel } from '@/components/ui/typography/CusTypography'
 import { toaster } from '@/components/ui/toaster/toaster'
 import { useCategoryMutations } from '../api-hooks/useCategories'
-import { CategoryThumb } from './CategoryThumb'
+import { CategoryThumb } from '../components/CategoryThumb'
 
 interface CategoryDialogProps {
   open: boolean

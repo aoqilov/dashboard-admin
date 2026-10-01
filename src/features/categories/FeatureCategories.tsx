@@ -14,7 +14,7 @@ import { toaster } from '@/components/ui/toaster/toaster'
 import { CusTitle } from '@/components/ui/typography/CusTypography'
 import { cn } from '@/utils/cn'
 import { useCategories, useCategoryMutations } from './api-hooks/useCategories'
-import { CategoryDialog } from './components/CategoryDialog'
+import { CategoryDialog } from './modals/CategoryDialog'
 import { CategoryThumb } from './components/CategoryThumb'
 
 type DialogState =

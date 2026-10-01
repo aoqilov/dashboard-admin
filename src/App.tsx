@@ -1,6 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import { AppLayout } from '@/components/layout/admin/AppLayout'
-import Catalog from '@/pages/admin/Catalog'
 import Categories from '@/pages/admin/Categories'
 import DevUI from '@/pages/admin/DevUI'
 import Discounts from '@/pages/admin/Discounts'
@@ -35,7 +34,6 @@ const ROUTES: Record<string, RouteConfig> = {
   'product-new': { path: '/products/new', page: ProductForm, nav: 'products' },
   'product-edit': { path: '/products/:id', page: ProductForm, nav: 'products' },
   categories: { path: '/categories', page: Categories },
-  catalog: { path: '/catalog', page: Catalog },
   discounts: { path: '/discounts', page: Discounts },
   news: { path: '/news', page: News },
   store: { path: '/store', page: Store },

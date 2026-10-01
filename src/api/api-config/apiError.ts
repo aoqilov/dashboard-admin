@@ -19,3 +19,17 @@ export function getErrorMessage(error: unknown, fallback = "Xatolik yuz berdi. Q
   }
   return fallback
 }
+
+/** DRF maydon xatolari (400): { slug: ["already exists"] } -> { slug: "already exists" } */
+export function getFieldErrors(error: unknown): Record<string, string> {
+  if (!isAxiosError(error) || error.response?.status !== 400) return {}
+  const data: unknown = error.response.data
+  if (!data || typeof data !== 'object') return {}
+
+  const errors: Record<string, string> = {}
+  for (const [key, value] of Object.entries(data)) {
+    const message = Array.isArray(value) ? value[0] : value
+    if (typeof message === 'string') errors[key] = message
+  }
+  return errors
+}

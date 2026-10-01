@@ -18,6 +18,8 @@ interface CusTabsProps {
   variant?: 'line' | 'subtle' | 'enclosed' | 'outline' | 'plain'
   size?: 'sm' | 'md' | 'lg'
   fitted?: boolean
+  /** Tablar bir qatorda qoladi, sig'masa gorizontal scroll bo'ladi */
+  scrollable?: boolean
   className?: string
 }
 
@@ -29,6 +31,7 @@ export function CusTabs({
   variant = 'line',
   size = 'md',
   fitted,
+  scrollable,
   className,
 }: CusTabsProps) {
   return (
@@ -41,9 +44,15 @@ export function CusTabs({
       fitted={fitted}
       className={className}
     >
-      <Tabs.List>
+      <Tabs.List css={scrollable ? { overflowX: 'auto', overflowY: 'hidden', scrollbarWidth: 'none' } : undefined}>
         {items.map((item) => (
-          <Tabs.Trigger key={item.value} value={item.value} disabled={item.isDisabled}>
+          <Tabs.Trigger
+            key={item.value}
+            value={item.value}
+            disabled={item.isDisabled}
+            // Scroll konteyner chiziqdan pastini kesadi — indikator ichkariga olinadi
+            css={scrollable ? { flexShrink: 0, '--indicator-offset-y': '0px' } : undefined}
+          >
             {item.icon}
             {item.label}
           </Tabs.Trigger>

@@ -14,10 +14,13 @@ api/
   common.types.ts  Paginated<T>, GetAllRequest {page,pageSize,filters}, ContentStatus, PhotoProcessingStatus, TokenPair
   fetchAll.ts      fetchAll(api.getAll, filters?) — all pages (pageSize max 100), for lookups/selects
   routes/<tag>/<name>.api.ts + <name>.types.ts   one folder per swagger tag (stores-*, public-*, customers-*)
-features/<name>/  Feature<Name>.tsx (page body) + components/ + api-hooks/ + utils/
-  catalog/        colors, tags, materials, material groups: hooks (useCatalog.ts), CatalogItemDialog (create/edit, quick-create)
+features/<name>/  Feature<Name>.tsx (page body) + components/ + modals/ (every CusDialog-based modal) + api-hooks/ + utils/
+  catalog/        no page (managed in /store tabs). colors, tags, materials, material groups: hooks (useCatalog.ts),
+                  modals/CatalogItemDialog (create/edit, quick-create in product form)
   categories/     useCategories() → {roots, childrenOf, byId}; master-detail page
   products/       list (FeatureProducts), form (FeatureProductForm, components/form/*), utils/productForm.ts
+  store/          /store?tab=… one row of tabs; each tab = components/<X>Tab (CrudSection: table + ⋯ menu + delete confirm)
+                  + modals/<X>Modal (FormModal + useEntityForm). Colors/tags/materials tabs reuse catalog hooks + CatalogItemDialog
 pages/admin/      thin wrappers: `export default () => <FeatureX />`; pages/Login.tsx
 router/router.ts  matchPath, RouteContext, useParams(), useSearchParams()
 components/
@@ -28,10 +31,12 @@ components/
   charts/BaseChart.tsx    ApexCharts wrapper; options in config/charts
 context/ + hooks/useTheme  light/dark (`.dark` on <html>) + accent
 hooks/useCrudMutations.ts  create/update/remove mutations for a simple CRUD route + invalidate
+hooks/useEntityForm.ts     modal form: values/errors/set, validate → save → toast, DRF 400 field errors → fields
 theme/            tokens.ts (ColorVariant class maps), accents.ts
 style/chakra-system.ts  Chakra tokens bound to index.css vars (preflight off)
 index.css         Tailwind @theme tokens (colors, text scale, radius, spacing) + accent scales + dark overrides
-utils/            cn(), navigate(), media (mediaUrl, photoUrl), format (formatPrice/Date/Compact), slugify, phone
+utils/            cn(), navigate(), media (mediaUrl, photoUrl), format (formatPrice/Date/Compact), slugify,
+                  phone (CusPhoneInput keeps 9 digits: parseUzPhone ← API, toUzPhone → API, displayUzPhone), validate (isEmail, isUrl, normalizeUrl)
 data/dashboard.ts mock data for dashboard
 pages/admin/DevUI.tsx  /preview-dev — live demo of every Cus* component (look here for usage examples)
 ```
@@ -79,4 +84,5 @@ Adding a page = 1) `features/x/FeatureX.tsx`, 2) `pages/admin/X.tsx`, 3) entry i
 - Shell: no python; use node -e or Edit/Write. Avoid backticks inside bash heredocs/strings.
 
 ## Status
-Done: auth, layout, UI kit, dashboard (mock), settings accent, categories, products list (URL filters, table/grid) + create/edit form, catalog (/catalog). Placeholders: discounts, news, store.
+Done: auth, layout, UI kit, dashboard (mock), settings accent, categories, products list (URL filters, table/grid) + create/edit form, store (/store: info, addresses, contacts, services, social links, colors, tags, materials, material groups). Placeholders: discounts, news.
+Open: Icon.name meaning (lucide name?) unknown — services show it as text.
