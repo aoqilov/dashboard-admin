@@ -1,4 +1,5 @@
 import type { StoreAddress, StoreAddressRequest } from '@/api/routes/stores-addresses/storeAddresses.types'
+import { CusFormDialog } from '@/components/ui/dialog/CusFormDialog'
 import { CusInput } from '@/components/ui/inputs/CusInput'
 import { CusPhoneInput } from '@/components/ui/inputs/CusPhoneInput'
 import { CusTextArea } from '@/components/ui/inputs/CusTextArea'
@@ -6,7 +7,6 @@ import { useEntityForm, type FormErrors } from '@/hooks/useEntityForm'
 import { parseUzPhone, toUzPhone, UZ_PHONE_LENGTH } from '@/utils/phone'
 import { useAddressMutations } from '../api-hooks/useStore'
 import type { CrudModalProps } from '../components/CrudSection'
-import { FormModal } from './FormModal'
 
 interface Values {
   name: string
@@ -58,7 +58,7 @@ export function AddressModal({ item, open, onOpenChange }: CrudModalProps<StoreA
   })
 
   return (
-    <FormModal
+    <CusFormDialog
       open={open}
       onOpenChange={onOpenChange}
       title={item ? 'Manzilni tahrirlash' : 'Yangi manzil'}
@@ -109,6 +109,6 @@ export function AddressModal({ item, open, onOpenChange }: CrudModalProps<StoreA
           onChange={(digits) => set('phone', digits)}
         />
       </div>
-    </FormModal>
+    </CusFormDialog>
   )
 }

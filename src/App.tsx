@@ -5,7 +5,6 @@ import DevUI from '@/pages/admin/DevUI'
 import Discounts from '@/pages/admin/Discounts'
 import Dashboard from '@/pages/admin/main/Dashboard'
 import News from '@/pages/admin/News'
-import ProductForm from '@/pages/admin/ProductForm'
 import Products from '@/pages/admin/Products'
 import Settings from '@/pages/admin/Settings'
 import Store from '@/pages/admin/Store'
@@ -25,14 +24,12 @@ interface RouteConfig {
 
 /**
  * id -> sahifa va URL. Sidebar id lari sidebarNav.ts bilan mos bo'lishi kerak.
- * Tartib muhim: aniq yo'l ('/products/new') parametrli yo'ldan ('/products/:id') oldin.
+ * Tartib muhim: aniq yo'l ('/x/new') parametrli yo'ldan ('/x/:id') oldin.
  */
 const ROUTES: Record<string, RouteConfig> = {
   login: { path: '/login', page: Login, public: true },
   overview: { path: '/', page: Dashboard },
   products: { path: '/products', page: Products },
-  'product-new': { path: '/products/new', page: ProductForm, nav: 'products' },
-  'product-edit': { path: '/products/:id', page: ProductForm, nav: 'products' },
   categories: { path: '/categories', page: Categories },
   discounts: { path: '/discounts', page: Discounts },
   news: { path: '/news', page: News },

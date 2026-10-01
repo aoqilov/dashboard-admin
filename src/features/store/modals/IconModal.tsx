@@ -1,8 +1,8 @@
 import type { Icon, IconRequest } from '@/api/routes/stores-icons/storeIcons.types'
+import { CusFormDialog } from '@/components/ui/dialog/CusFormDialog'
 import { CusInput } from '@/components/ui/inputs/CusInput'
 import { useEntityForm, type FormErrors } from '@/hooks/useEntityForm'
 import { useIconMutations } from '../api-hooks/useStore'
-import { FormModal } from './FormModal'
 
 interface Values {
   name: string
@@ -34,7 +34,7 @@ export function IconModal({ open, onOpenChange, onCreated }: IconModalProps) {
   })
 
   return (
-    <FormModal
+    <CusFormDialog
       open={open}
       onOpenChange={onOpenChange}
       size="xs"
@@ -50,6 +50,6 @@ export function IconModal({ open, onOpenChange, onCreated }: IconModalProps) {
         error={errors.name}
         onChange={(event) => set('name', event.target.value)}
       />
-    </FormModal>
+    </CusFormDialog>
   )
 }

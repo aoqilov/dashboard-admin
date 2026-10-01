@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import type { StoreService, StoreServiceRequest } from '@/api/routes/stores-services/storeServices.types'
+import { CusFormDialog } from '@/components/ui/dialog/CusFormDialog'
 import { CusInput } from '@/components/ui/inputs/CusInput'
 import { CusSwitch } from '@/components/ui/inputs/CusSwitch'
 import { CusTextArea } from '@/components/ui/inputs/CusTextArea'
@@ -8,7 +9,6 @@ import { CusSelect } from '@/components/ui/select/CusSelect'
 import { useEntityForm, type FormErrors } from '@/hooks/useEntityForm'
 import { useIcons, useServiceMutations } from '../api-hooks/useStore'
 import type { CrudModalProps } from '../components/CrudSection'
-import { FormModal } from './FormModal'
 import { IconModal } from './IconModal'
 
 interface Values {
@@ -63,7 +63,7 @@ export function ServiceModal({ item, open, onOpenChange }: CrudModalProps<StoreS
 
   return (
     <>
-      <FormModal
+      <CusFormDialog
         open={open}
         onOpenChange={onOpenChange}
         title={item ? 'Xizmatni tahrirlash' : 'Yangi xizmat'}
@@ -118,7 +118,7 @@ export function ServiceModal({ item, open, onOpenChange }: CrudModalProps<StoreS
         <CusSwitch checked={values.visible} onChange={(checked) => set('visible', checked)}>
           Saytda ko'rinadi
         </CusSwitch>
-      </FormModal>
+      </CusFormDialog>
 
       {/* Forma tashqarisida — ichki forma submit'i tashqi formaga o'tmasin */}
       {iconModal && (

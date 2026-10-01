@@ -89,6 +89,7 @@ export function CatalogItemDialog({
       open={open}
       onOpenChange={onOpenChange}
       size="xs"
+      isPersistent
       title={isEdit ? `${noun}ni tahrirlash` : `Yangi ${noun.toLowerCase()}`}
       footer={
         <>

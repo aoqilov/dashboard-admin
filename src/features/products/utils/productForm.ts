@@ -1,7 +1,8 @@
 import { getFieldErrors } from '@/api/api-config/apiError'
 import type { StoreProductPhoto } from '@/api/routes/stores-product-photos/storeProductPhotos.types'
 import type { StoreProduct, StoreProductRequest } from '@/api/routes/stores-products/storeProducts.types'
-import { SLUG_PATTERN } from '@/utils/slugify'
+import type { StepItem } from '@/components/ui/steps/CusSteps'
+import { SLUG_PATTERN, slugify } from '@/utils/slugify'
 
 /** Variant ichidagi bitta rasm: yuklanayotgan yoki tayyor */
 export interface PhotoDraft {
@@ -143,6 +144,67 @@ export function toRequest(values: ProductFormValues): StoreProductRequest {
 export function serverFieldErrors(error: unknown): ProductFormErrors {
   return getFieldErrors(error) as ProductFormErrors
 }
+
+/**
+ * Nusxa: barcha maydonlar ko'chadi, rasmlar — yo'q
+ * (bitta rasmni ikki mahsulotda ishlatish backend'da kafolatlanmagan). Slug nomdan yasaladi.
+ */
+export function duplicateValues(source: StoreProduct): ProductFormValues {
+  const name = `${source.name} (nusxa)`
+  return { ...toFormValues(source), name, slug: slugify(name), variants: [emptyVariant()] }
+}
+
+function pick<T extends object, K extends keyof T>(source: T, keys: readonly K[]) {
+  return Object.fromEntries(keys.map((key) => [key, source[key]])) as Pick<T, K>
+}
+
+// ─── Modal qadamlari ─────────────────────────────────────────────────────────
+
+/** 1 — barcha majburiy maydonlar, 2 — rasmlar va ixtiyoriy xususiyatlar */
+export const PRODUCT_STEPS: StepItem[] = [
+  { title: "Asosiy ma'lumot", description: 'Nom, kategoriya, narx' },
+  { title: 'Rasm va xususiyatlar', description: 'Rasmlar, rang, material' },
+]
+
+const STEP_FIELDS: (keyof ProductFormValues)[][] = [
+  [
+    'name',
+    'slug',
+    'description',
+    'category',
+    'subcategory',
+    'tags',
+    'is_sellable',
+    'is_rentable',
+    'price_sale',
+    'price_rental',
+    'price_tailoring',
+  ],
+  ['variants', 'brand', 'manufacture', 'color', 'size', 'material_ids', 'blur_image_in_site'],
+]
+
+/** Faqat shu qadamdagi xatolar ("Keyingi" bosilganda) */
+export function stepErrors(errors: ProductFormErrors, step: number): ProductFormErrors {
+  return pick(errors, STEP_FIELDS[step])
+}
+
+/** Xatosi bor birinchi qadam. Xato noma'lum maydonda bo'lsa — null */
+export function firstStepWithError(errors: ProductFormErrors) {
+  const index = STEP_FIELDS.findIndex((fields) => fields.some((key) => errors[key]))
+  return index === -1 ? null : index
+}
+
+export const hasErrors = (errors: ProductFormErrors) => Object.values(errors).some(Boolean)
+
+// ─── Tezkor narx modali ──────────────────────────────────────────────────────
+
+const PRICE_FIELDS = ['is_sellable', 'is_rentable', 'price_sale', 'price_rental', 'price_tailoring'] as const
+
+/** Narx modalida faqat narx maydonlari tekshiriladi */
+export const validatePrices = (values: ProductFormValues): ProductFormErrors => pick(validate(values), PRICE_FIELDS)
+
+/** PATCH uchun faqat narx maydonlari */
+export const toPriceRequest = (values: ProductFormValues) => pick(toRequest(values), PRICE_FIELDS)
 
 /** Forma bo'limlariga beriladigan umumiy props */
 export interface SectionProps {

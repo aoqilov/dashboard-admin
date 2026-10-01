@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Combobox, Portal, useFilter, useListCollection } from '@chakra-ui/react'
 import { CusField, type CusFieldProps } from '../inputs/CusField'
 import type { SelectOption } from './CusSelect'
@@ -32,7 +33,14 @@ export function CusCombobox({
   size = 'lg',
 }: CusComboboxProps) {
   const { contains } = useFilter({ sensitivity: 'base' })
-  const { collection, filter } = useListCollection({ initialItems: options, filter: contains })
+  const { collection, filter, set } = useListCollection({ initialItems: options, filter: contains })
+
+  // Variantlar keyin yuklansa yoki yangisi qo'shilsa ro'yxat yangilanadi.
+  // options massivi har renderda yangi bo'ladi — shuning uchun tarkibi bo'yicha kuzatiladi
+  const signature = options.map((option) => `${option.value}:${option.label}`).join('|')
+  useEffect(() => {
+    set(options)
+  }, [signature]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <CusField {...{ label, helperText, errorText, isRequired, isDisabled, isReadOnly, className }}>

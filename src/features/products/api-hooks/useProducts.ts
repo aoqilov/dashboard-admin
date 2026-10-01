@@ -6,7 +6,6 @@ import type { StoreProductUpdateRequest } from '@/api/routes/stores-products/sto
 export const productKeys = {
   all: ['products'] as const,
   list: (body: GetAllRequest) => ['products', 'list', body] as const,
-  detail: (id: number) => ['products', 'detail', id] as const,
 }
 
 /** Ro'yxat. Sahifa/filtr almashganda eski ma'lumot ko'rinib turadi (sakrash yo'q) */
@@ -15,14 +14,6 @@ export function useProducts(body: GetAllRequest) {
     queryKey: productKeys.list(body),
     queryFn: () => storeProducts.getAll(body),
     placeholderData: keepPreviousData,
-  })
-}
-
-export function useProduct(id: number | undefined) {
-  return useQuery({
-    queryKey: productKeys.detail(id!),
-    queryFn: () => storeProducts.getOne(id!),
-    enabled: id !== undefined,
   })
 }
 

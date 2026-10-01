@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { CusCard } from '@/components/shared/card/CusCard'
 
 interface FormSectionProps {
   title: string
@@ -9,18 +8,18 @@ interface FormSectionProps {
   children: ReactNode
 }
 
-/** Forma bo'limi: sarlavha + qisqa izoh + maydonlar */
+/** Modal ichidagi forma bo'limi: sarlavha + qisqa izoh + maydonlar. Bo'limlar orasida chiziq */
 export function FormSection({ title, description, action, children }: FormSectionProps) {
   return (
-    <CusCard className="flex flex-col gap-5">
+    <section className="flex flex-col gap-5 py-6 first:pt-0 last:pb-0">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-heading">{title}</h2>
+          <h3 className="text-base font-semibold text-heading">{title}</h3>
           {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
         </div>
         {action}
       </div>
       {children}
-    </CusCard>
+    </section>
   )
 }

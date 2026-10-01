@@ -28,7 +28,16 @@ function ServiceRow({ title, description, toggle, children }: {
   )
 }
 
-export function PricingSection({ values, errors, set }: SectionProps) {
+export function PricingSection(props: SectionProps) {
+  return (
+    <FormSection title="Narx va xizmatlar" description="Mahsulot bilan qaysi xizmatlar taklif qilinadi">
+      <PricingFields {...props} />
+    </FormSection>
+  )
+}
+
+/** Sotuv / ijara / tikish narxlari — mahsulot formasida va tezkor narx modalida */
+export function PricingFields({ values, errors, set }: SectionProps) {
   const priceInput = (key: PriceKey, placeholder: string) => (
     <CusInput
       className="sm:max-w-xs"
@@ -46,18 +55,16 @@ export function PricingSection({ values, errors, set }: SectionProps) {
   )
 
   return (
-    <FormSection title="Narx va xizmatlar" description="Mahsulot bilan qaysi xizmatlar taklif qilinadi">
-      <div className="flex flex-col divide-y divide-border">
-        <ServiceRow title="Sotuv" description="Mijoz mahsulotni sotib oladi" toggle={toggle('is_sellable')}>
-          {values.is_sellable && priceInput('price_sale', '1 450 000')}
-        </ServiceRow>
-        <ServiceRow title="Ijara" description="Mahsulot vaqtincha ijaraga beriladi" toggle={toggle('is_rentable')}>
-          {values.is_rentable && priceInput('price_rental', '200 000')}
-        </ServiceRow>
-        <ServiceRow title="Tikib berish" description="Buyurtma asosida tikish narxi (ixtiyoriy)">
-          {priceInput('price_tailoring', "Bo'sh — xizmat yo'q")}
-        </ServiceRow>
-      </div>
-    </FormSection>
+    <div className="flex flex-col divide-y divide-border">
+      <ServiceRow title="Sotuv" description="Mijoz mahsulotni sotib oladi" toggle={toggle('is_sellable')}>
+        {values.is_sellable && priceInput('price_sale', '1 450 000')}
+      </ServiceRow>
+      <ServiceRow title="Ijara" description="Mahsulot vaqtincha ijaraga beriladi" toggle={toggle('is_rentable')}>
+        {values.is_rentable && priceInput('price_rental', '200 000')}
+      </ServiceRow>
+      <ServiceRow title="Tikib berish" description="Buyurtma asosida tikish narxi (ixtiyoriy)">
+        {priceInput('price_tailoring', "Bo'sh — xizmat yo'q")}
+      </ServiceRow>
+    </div>
   )
 }

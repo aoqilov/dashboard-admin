@@ -1,4 +1,5 @@
 import type { Store, StoreUpdateRequest } from '@/api/routes/stores-store/store.types'
+import { CusFormDialog } from '@/components/ui/dialog/CusFormDialog'
 import { CusInput } from '@/components/ui/inputs/CusInput'
 import { CusPhoneInput } from '@/components/ui/inputs/CusPhoneInput'
 import { CusTextArea } from '@/components/ui/inputs/CusTextArea'
@@ -6,7 +7,6 @@ import { useEntityForm, type FormErrors } from '@/hooks/useEntityForm'
 import { parseUzPhone, toUzPhone, UZ_PHONE_LENGTH } from '@/utils/phone'
 import { isEmail } from '@/utils/validate'
 import { useUpdateStoreInfo } from '../api-hooks/useStore'
-import { FormModal } from './FormModal'
 
 interface Values {
   name: string
@@ -62,7 +62,7 @@ export function StoreInfoModal({ store, open, onOpenChange }: StoreInfoModalProp
   })
 
   return (
-    <FormModal
+    <CusFormDialog
       open={open}
       onOpenChange={onOpenChange}
       title="Do'kon ma'lumotlari"
@@ -103,6 +103,6 @@ export function StoreInfoModal({ store, open, onOpenChange }: StoreInfoModalProp
         errorText={errors.description}
         onChange={(event) => set('description', event.target.value)}
       />
-    </FormModal>
+    </CusFormDialog>
   )
 }

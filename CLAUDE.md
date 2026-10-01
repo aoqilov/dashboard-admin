@@ -15,17 +15,20 @@ api/
   fetchAll.ts      fetchAll(api.getAll, filters?) — all pages (pageSize max 100), for lookups/selects
   routes/<tag>/<name>.api.ts + <name>.types.ts   one folder per swagger tag (stores-*, public-*, customers-*)
 features/<name>/  Feature<Name>.tsx (page body) + components/ + modals/ (every CusDialog-based modal) + api-hooks/ + utils/
+                  Form modals are persistent (isPersistent: no close on outside click). No separate create/edit pages.
   catalog/        no page (managed in /store tabs). colors, tags, materials, material groups: hooks (useCatalog.ts),
                   modals/CatalogItemDialog (create/edit, quick-create in product form)
   categories/     useCategories() → {roots, childrenOf, byId}; master-detail page
-  products/       list (FeatureProducts), form (FeatureProductForm, components/form/*), utils/productForm.ts
+  products/       table list (FeatureProducts, URL filters + ProductFilterDrawer) + modals/: ProductFormModal (2 steps:
+                  1 required fields, 2 photos/attributes; persistent, asks before closing dirty), ProductPriceModal, duplicate
+                  (= form modal with duplicateValues, no photos). Sections in components/form/*, mapping in utils/productForm.ts
   store/          /store?tab=… one row of tabs; each tab = components/<X>Tab (CrudSection: table + ⋯ menu + delete confirm)
-                  + modals/<X>Modal (FormModal + useEntityForm). Colors/tags/materials tabs reuse catalog hooks + CatalogItemDialog
+                  + modals/<X>Modal (CusFormDialog + useEntityForm). Colors/tags/materials tabs reuse catalog hooks + CatalogItemDialog
 pages/admin/      thin wrappers: `export default () => <FeatureX />`; pages/Login.tsx
 router/router.ts  matchPath, RouteContext, useParams(), useSearchParams()
 components/
   ui/<kind>/Cus*.tsx      UI kit (CusButton, CusInput, CusField, CusSelect, CusCombobox, CusTable, CusPagination, CusDialog,
-                          CusDialogDelete, CusDrawer, CusTabs, CusSegment, CusBadge, CusTag, CusMenu, CusEmptyState, CusSkeleton…)
+                          CusFormDialog (form + Bekor/Saqlash, persistent), CusDialogDelete, CusDrawer, CusTabs, CusSegment, CusBadge, CusTag, CusMenu, CusEmptyState, CusSkeleton…)
   shared/                 CusCard/CusCardHeader, PageHeader {title,description,actions}, CusStatItem
   layout/admin/           AppLayout, header/, sidebar/ (sidebarNav.ts = menu), PageGrid (12-col grid)
   charts/BaseChart.tsx    ApexCharts wrapper; options in config/charts
@@ -42,7 +45,7 @@ pages/admin/DevUI.tsx  /preview-dev — live demo of every Cus* component (look 
 ```
 
 ## Routing (no router lib)
-`App.tsx` `ROUTES` map: id → {path (params ok: '/products/:id'), page, public?, nav? (sidebar id to highlight)}. Order matters: '/products/new' before '/products/:id'.
+`App.tsx` `ROUTES` map: id → {path (params ok: '/x/:id'), page, public?, nav? (sidebar id to highlight)}. Order matters: '/x/new' before '/x/:id'.
 Adding a page = 1) `features/x/FeatureX.tsx`, 2) `pages/admin/X.tsx`, 3) entry in `ROUTES`, 4) same id in `sidebarNav.ts`.
 `useParams()`, `useSearchParams()` (setter replaces history — for list filters) from `@/router/router`. Nav: `navigate('/path?x=1')` from `@/utils/navigate`.
 
@@ -68,7 +71,7 @@ Adding a page = 1) `features/x/FeatureX.tsx`, 2) `pages/admin/X.tsx`, 3) entry i
 ## Domain notes
 - Category = StoreCategory; subcategory = category with `parent`.
 - Product photos: upload first (POST /stores/product-photos/ FormData `image`) → id; `processing_status` pending→ready (form polls every 3s). Product saves `variants: [{photos: ids}]`. Variant = photo set only (no color/size) — open question to backend.
-- Product form mapping: `features/products/utils/productForm.ts` (toFormValues / validate / toRequest / serverFieldErrors).
+- Product form mapping: `features/products/utils/productForm.ts` (toFormValues / validate / toRequest / serverFieldErrors, step fields, duplicateValues, price-only helpers).
 
 ## Styling rules
 - Visual style = AdminKit (light: #f5f7fb/white, dark: navy #121a23/#1a2430, primary #3b7ddd, Inter, 4px radius, borderless cards with `shadow-card`).
@@ -84,5 +87,5 @@ Adding a page = 1) `features/x/FeatureX.tsx`, 2) `pages/admin/X.tsx`, 3) entry i
 - Shell: no python; use node -e or Edit/Write. Avoid backticks inside bash heredocs/strings.
 
 ## Status
-Done: auth, layout, UI kit, dashboard (mock), settings accent, categories, products list (URL filters, table/grid) + create/edit form, store (/store: info, addresses, contacts, services, social links, colors, tags, materials, material groups). Placeholders: discounts, news.
+Done: auth, layout, UI kit, dashboard (mock), settings accent, categories, products (table + URL filters, 2-step create/edit modal, price modal, duplicate), store (/store: info, addresses, contacts, services, social links, colors, tags, materials, material groups). Placeholders: discounts, news.
 Open: Icon.name meaning (lucide name?) unknown — services show it as text.

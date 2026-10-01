@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronRight, Ellipsis, FolderTree, Layers, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowRight, ChevronRight, Ellipsis, FolderTree, Layers, Pencil, Plus, Trash2 } from 'lucide-react'
 import { getErrorMessage } from '@/api/api-config/apiError'
 import type { StoreCategory } from '@/api/routes/stores-categories/storeCategories.types'
 import { CusCard } from '@/components/shared/card/CusCard'
@@ -13,6 +13,7 @@ import { CusSkeleton } from '@/components/ui/skeleton/CusSkeleton'
 import { toaster } from '@/components/ui/toaster/toaster'
 import { CusTitle } from '@/components/ui/typography/CusTypography'
 import { cn } from '@/utils/cn'
+import { navigate } from '@/utils/navigate'
 import { useCategories, useCategoryMutations } from './api-hooks/useCategories'
 import { CategoryDialog } from './modals/CategoryDialog'
 import { CategoryThumb } from './components/CategoryThumb'
@@ -37,6 +38,12 @@ export default function FeatureCategories() {
   const selected = roots.find((root) => root.id === selectedId) ?? roots[0]
   const children = selected ? (tree?.childrenOf.get(selected.id) ?? []) : []
   const deleteChildren = toDelete ? (tree?.childrenOf.get(toDelete.id)?.length ?? 0) : 0
+
+  /** /products sahifasi shu subkategoriya bo'yicha filtrlangan holda ochiladi */
+  const openProducts = (sub: StoreCategory) => {
+    const query = new URLSearchParams({ category: String(sub.parent ?? ''), subcategory: String(sub.id) })
+    navigate(`/products?${query}`)
+  }
 
   const handleDelete = async () => {
     if (!toDelete) return
@@ -161,9 +168,21 @@ export default function FeatureCategories() {
               ) : (
                 <ul className="flex flex-col divide-y divide-border">
                   {children.map((child) => (
-                    <li key={child.id} className="flex items-center gap-3 py-2.5">
-                      <CategoryThumb category={child} className="size-9" />
-                      <span className="flex-1 truncate text-sm text-heading">{child.name}</span>
+                    <li key={child.id} className="flex items-center gap-1 py-1">
+                      {/* Bosilganda — shu subkategoriya mahsulotlari (filtr URL'da) */}
+                      <button
+                        type="button"
+                        onClick={() => openProducts(child)}
+                        className="group flex min-w-0 flex-1 items-center gap-3 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-hover"
+                      >
+                        <CategoryThumb category={child} className="size-9" />
+                        <span className="min-w-0 flex-1 truncate text-sm text-heading group-hover:text-primary dark:group-hover:text-primary-light">
+                          {child.name}
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1 text-xs text-muted opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                          Mahsulotlar <ArrowRight className="size-3.5" />
+                        </span>
+                      </button>
                       {actions(child)}
                     </li>
                   ))}

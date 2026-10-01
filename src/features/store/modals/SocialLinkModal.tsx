@@ -3,6 +3,7 @@ import type {
   StoreSocialLink,
   StoreSocialLinkRequest,
 } from '@/api/routes/stores-social-links/storeSocialLinks.types'
+import { CusFormDialog } from '@/components/ui/dialog/CusFormDialog'
 import { CusInput } from '@/components/ui/inputs/CusInput'
 import { CusSwitch } from '@/components/ui/inputs/CusSwitch'
 import { CusSelect } from '@/components/ui/select/CusSelect'
@@ -11,7 +12,6 @@ import { isUrl, normalizeUrl } from '@/utils/validate'
 import { useSocialLinkMutations } from '../api-hooks/useStore'
 import type { CrudModalProps } from '../components/CrudSection'
 import { PLATFORMS } from '../utils/storeTabs'
-import { FormModal } from './FormModal'
 
 /** Backend URLField chegarasi */
 const URL_MAX = 200
@@ -72,7 +72,7 @@ export function SocialLinkModal({ item, open, onOpenChange }: CrudModalProps<Sto
   })
 
   return (
-    <FormModal
+    <CusFormDialog
       open={open}
       onOpenChange={onOpenChange}
       title={item ? 'Havolani tahrirlash' : 'Yangi havola'}
@@ -111,6 +111,6 @@ export function SocialLinkModal({ item, open, onOpenChange }: CrudModalProps<Sto
       <CusSwitch checked={values.visible} onChange={(checked) => set('visible', checked)}>
         Saytda ko'rinadi
       </CusSwitch>
-    </FormModal>
+    </CusFormDialog>
   )
 }

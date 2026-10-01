@@ -1,20 +1,24 @@
 import { useId, type FormEvent, type ReactNode } from 'react'
-import { CusButton } from '@/components/ui/buttons/CusButton'
-import { CusDialog } from '@/components/ui/dialog/CusDialog'
+import { CusButton } from '../buttons/CusButton'
+import { CusDialog } from './CusDialog'
 
-interface FormModalProps {
+interface CusFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
-  description?: string
+  description?: ReactNode
   onSubmit: (event: FormEvent) => void
   isSaving?: boolean
   size?: 'xs' | 'sm' | 'md' | 'lg'
+  submitText?: string
   children: ReactNode
 }
 
-/** Forma modali asosi: sarlavha, maydonlar, "Bekor qilish" / "Saqlash" */
-export function FormModal({
+/**
+ * Forma modali: sarlavha, maydonlar, "Bekor qilish" / "Saqlash".
+ * Tashqariga bosilganda yopilmaydi — kiritilgan ma'lumot tasodifan yo'qolmasin.
+ */
+export function CusFormDialog({
   open,
   onOpenChange,
   title,
@@ -22,8 +26,9 @@ export function FormModal({
   onSubmit,
   isSaving,
   size = 'md',
+  submitText = 'Saqlash',
   children,
-}: FormModalProps) {
+}: CusFormDialogProps) {
   const formId = useId()
 
   return (
@@ -33,14 +38,14 @@ export function FormModal({
       size={size}
       title={title}
       description={description}
-      isPersistent={isSaving}
+      isPersistent
       footer={
         <>
           <CusButton variant="outline" onClick={() => onOpenChange(false)}>
             Bekor qilish
           </CusButton>
           <CusButton type="submit" form={formId} isLoading={isSaving}>
-            Saqlash
+            {submitText}
           </CusButton>
         </>
       }

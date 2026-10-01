@@ -15,6 +15,8 @@ export interface CusDialogProps {
   placement?: 'center' | 'top'
   /** Tashqariga bosganda yopilmasin */
   isPersistent?: boolean
+  /** inside — sarlavha va tugmalar joyida, faqat ichki qism scroll bo'ladi (uzun formalar) */
+  scrollBehavior?: 'inside' | 'outside'
 }
 
 export function CusDialog({
@@ -28,6 +30,7 @@ export function CusDialog({
   size = 'md',
   placement = 'center',
   isPersistent,
+  scrollBehavior = 'outside',
 }: CusDialogProps) {
   return (
     <Dialog.Root
@@ -35,6 +38,7 @@ export function CusDialog({
       onOpenChange={(details) => onOpenChange?.(details.open)}
       size={size}
       placement={placement}
+      scrollBehavior={scrollBehavior}
       closeOnInteractOutside={!isPersistent}
       motionPreset="slide-in-bottom"
     >

@@ -1,4 +1,4 @@
-import { Ellipsis, Eye, Heart, Pencil, Trash2 } from 'lucide-react'
+import { Banknote, Copy, Ellipsis, Eye, Heart, Pencil, Trash2 } from 'lucide-react'
 import type { StoreProduct } from '@/api/routes/stores-products/storeProducts.types'
 import { CusIconButton } from '@/components/ui/buttons/CusIconButton'
 import { CusMenu } from '@/components/ui/menu/CusMenu'
@@ -8,22 +8,24 @@ import { formatCompact, formatDate } from '@/utils/format'
 import { categoryPath, productCover } from '../../utils/productView'
 import { AvailabilityBadges, ProductImage, ProductPrice } from '../shared/ProductBits'
 
+/** ⋯ menyusidagi amallar. Qatorni bosish — edit */
+export type ProductAction = 'edit' | 'price' | 'duplicate' | 'delete'
+
 interface ProductTableProps {
   products: StoreProduct[]
   tree?: CategoryTree
   isLoading?: boolean
   emptyText?: string
-  onOpen: (product: StoreProduct) => void
-  onDelete: (product: StoreProduct) => void
+  onAction: (action: ProductAction, product: StoreProduct) => void
 }
 
-export function ProductTable({ products, tree, isLoading, emptyText, onOpen, onDelete }: ProductTableProps) {
+export function ProductTable({ products, tree, isLoading, emptyText, onAction }: ProductTableProps) {
   const columns: TableColumn<StoreProduct>[] = [
     {
       key: 'name',
       header: 'Mahsulot',
       render: (product) => (
-        <div className="flex min-w-[220px] items-center gap-3">
+        <div className="flex min-w-55 items-center gap-3">
           <ProductImage src={productCover(product)} className="size-11 rounded-control" />
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-heading">{product.name}</p>
@@ -70,9 +72,12 @@ export function ProductTable({ products, tree, isLoading, emptyText, onOpen, onD
             trigger={<CusIconButton icon={Ellipsis} label="Amallar" size="sm" />}
             items={[
               { value: 'edit', label: 'Tahrirlash', icon: <Pencil className="size-4" /> },
+              { value: 'price', label: "Narxni o'zgartirish", icon: <Banknote className="size-4" /> },
+              { value: 'duplicate', label: 'Nusxa olish', icon: <Copy className="size-4" /> },
+              { separator: true },
               { value: 'delete', label: "O'chirish", icon: <Trash2 className="size-4" />, isDanger: true },
             ]}
-            onSelect={(value) => (value === 'edit' ? onOpen(product) : onDelete(product))}
+            onSelect={(value) => onAction(value as ProductAction, product)}
           />
         </div>
       ),
@@ -84,7 +89,7 @@ export function ProductTable({ products, tree, isLoading, emptyText, onOpen, onD
       columns={columns}
       data={products}
       rowKey={(product) => product.id}
-      onRowClick={onOpen}
+      onRowClick={(product) => onAction('edit', product)}
       isLoading={isLoading}
       emptyText={emptyText}
     />

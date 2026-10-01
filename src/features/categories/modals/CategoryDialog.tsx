@@ -61,6 +61,7 @@ export function CategoryDialog({ open, onOpenChange, category, parent }: Categor
       open={open}
       onOpenChange={onOpenChange}
       size="sm"
+      isPersistent
       title={isEdit ? `${noun}ni tahrirlash` : `Yangi ${noun.toLowerCase()}`}
       description={parent && !isEdit ? `${parent.name} ichida` : undefined}
       footer={

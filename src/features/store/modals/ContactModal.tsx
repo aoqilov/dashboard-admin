@@ -1,4 +1,5 @@
 import type { StoreContact, StoreContactRequest } from '@/api/routes/stores-contacts/storeContacts.types'
+import { CusFormDialog } from '@/components/ui/dialog/CusFormDialog'
 import { CusInput } from '@/components/ui/inputs/CusInput'
 import { CusPhoneInput } from '@/components/ui/inputs/CusPhoneInput'
 import { CusSwitch } from '@/components/ui/inputs/CusSwitch'
@@ -6,7 +7,6 @@ import { useEntityForm, type FormErrors } from '@/hooks/useEntityForm'
 import { parseUzPhone, toUzPhone, UZ_PHONE_LENGTH } from '@/utils/phone'
 import { useContactMutations } from '../api-hooks/useStore'
 import type { CrudModalProps } from '../components/CrudSection'
-import { FormModal } from './FormModal'
 
 interface Values {
   name: string
@@ -60,7 +60,7 @@ export function ContactModal({ item, open, onOpenChange }: CrudModalProps<StoreC
   })
 
   return (
-    <FormModal
+    <CusFormDialog
       open={open}
       onOpenChange={onOpenChange}
       title={item ? 'Kontaktni tahrirlash' : 'Yangi kontakt'}
@@ -112,6 +112,6 @@ export function ContactModal({ item, open, onOpenChange }: CrudModalProps<StoreC
       <CusSwitch checked={values.has_telegram} onChange={(checked) => set('has_telegram', checked)}>
         Telegram orqali yozish mumkin
       </CusSwitch>
-    </FormModal>
+    </CusFormDialog>
   )
 }
