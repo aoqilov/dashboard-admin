@@ -22,8 +22,6 @@ import { FormSection } from './FormSection'
 interface ProductPhotosSectionProps {
   variants: VariantDraft[]
   pool: PhotoDraft[]
-  /** Joylanmagan rasmlar haqida xato (saqlashda) */
-  error?: string
   onChange: (updater: (prev: PhotoState) => PhotoState) => void
 }
 
@@ -98,7 +96,7 @@ function PhotoTile({ item, isCover, isDragging, onRemove, className, ...props }:
  * Fayllar tanlanganda serverga yuklanmaydi: "Saqlash" bosilganda faqat variantlarga qo'yilganlari
  * yuklanadi (POST /product-photos), mahsulot esa shu id lar bilan saqlanadi.
  */
-export function ProductPhotosSection({ variants, pool, error, onChange }: ProductPhotosSectionProps) {
+export function ProductPhotosSection({ variants, pool, onChange }: ProductPhotosSectionProps) {
   /** Sudralayotgan rasm (ichki). null bo'lsa — kompyuterdan fayl tashlanmoqda */
   const [dragKey, setDragKey] = useState<string | null>(null)
   /** Ustida turgan joy: POOL yoki variant key */
@@ -132,18 +130,27 @@ export function ProductPhotosSection({ variants, pool, error, onChange }: Produc
     setOverSlot(null)
   }
 
-  /** Tashlash: ichki rasm — ko'chiriladi, kompyuterdan fayl — shu joyga yuklanadi */
+  /** Tashlash: ichki rasm — ko'chiriladi, kompyuterdan fayl — shu joyga qo'shiladi */
   const handleDrop = (event: DragEvent, slot: string, beforeKey?: string) => {
     event.preventDefault()
     event.stopPropagation()
     if (dragKey) onChange((prev) => movePhoto(prev, dragKey, slot, beforeKey))
-    else if (event.dataTransfer.files.length) addFiles([...event.dataTransfer.files], slot)
+    else if (event.dataTransfer.files.length) addFiles(Array.from(event.dataTransfer.files), slot)
     endDrag()
   }
+
+  /** To'lgan variantga boshqa joydan rasm tashlab bo'lmaydi (o'z ichida tartiblash mumkin) */
+  const canDrop = (slot: string) =>
+    !dragKey ||
+    slot === POOL ||
+    freeSlots({ variants, pool }, slot) > 0 ||
+    Boolean(variants.find((variant) => variant.key === slot)?.photos.some((photo) => photo.key === dragKey))
 
   /** Joy (variant katagi yoki "yuklanganlar") — tashlash nishoni */
   const slotTarget = (slot: string) => ({
     onDragOver: (event: DragEvent) => {
+      // preventDefault qilinmasa — brauzer "tashlab bo'lmaydi" belgisini ko'rsatadi
+      if (!canDrop(slot)) return
       event.preventDefault()
       if (overSlot !== slot) setOverSlot(slot)
     },
@@ -160,7 +167,10 @@ export function ProductPhotosSection({ variants, pool, error, onChange }: Produc
   const tileProps = (item: PhotoDraft, slot: string) => ({
     item,
     isDragging: dragKey === item.key,
-    onRemove: () => onChange((prev) => removePhoto(prev, item.key)),
+    onRemove: () => {
+      if (item.preview) URL.revokeObjectURL(item.preview)
+      onChange((prev) => removePhoto(prev, item.key))
+    },
     onDragStart: (event: DragEvent) => {
       event.dataTransfer.effectAllowed = 'move'
       // Firefox sudrashni boshlashi uchun ma'lumot kerak
@@ -250,18 +260,11 @@ export function ProductPhotosSection({ variants, pool, error, onChange }: Produc
                 multiple
                 className="sr-only"
                 onChange={(event) => {
-                  addFiles([...(event.target.files ?? [])], POOL)
+                  addFiles(Array.from(event.target.files ?? []), POOL)
                   event.target.value = ''
                 }}
               />
             </label>
-
-            {error && (
-              <p className="flex items-center gap-1.5 text-sm text-danger">
-                <AlertCircle className="size-4 shrink-0" />
-                {error}
-              </p>
-            )}
 
             {pool.length > 0 ? (
               <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">

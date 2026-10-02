@@ -263,7 +263,6 @@ export function ProductFormModal({ open, onOpenChange, product, source }: Produc
             <ProductPhotosSection
               variants={values.variants}
               pool={values.pool}
-              error={errors.pool}
               onChange={setPhotos}
             />
           )}
