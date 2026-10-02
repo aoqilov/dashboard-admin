@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Table } from '@chakra-ui/react'
 import { CusEmptyState } from '../empty-state/CusEmptyState'
-import { CusSpinner } from '../spinner/CusSpinner'
+import { CusSkeleton } from '../skeleton/CusSkeleton'
 
 export interface TableColumn<T> {
   key: string
@@ -10,6 +10,8 @@ export interface TableColumn<T> {
   render?: (row: T, index: number) => ReactNode
   align?: 'start' | 'center' | 'end'
   width?: string
+  /** Yuklanayotganda katak ichida ko'rinadigan shakl. Berilmasa — bitta kulrang chiziq */
+  skeleton?: ReactNode
 }
 
 interface CusTableProps<T> {
@@ -18,6 +20,8 @@ interface CusTableProps<T> {
   rowKey: (row: T) => string | number
   onRowClick?: (row: T) => void
   isLoading?: boolean
+  /** Yuklanayotganda nechta qator shakli ko'rsatiladi */
+  skeletonRows?: number
   emptyText?: string
   size?: 'sm' | 'md' | 'lg'
   striped?: boolean
@@ -32,6 +36,7 @@ export function CusTable<T>({
   rowKey,
   onRowClick,
   isLoading,
+  skeletonRows = 6,
   emptyText,
   size = 'md',
   striped,
@@ -59,10 +64,20 @@ export function CusTable<T>({
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {isLoading || data.length === 0 ? (
+          {isLoading ? (
+            Array.from({ length: skeletonRows }, (_, index) => (
+              <Table.Row key={index}>
+                {columns.map((column) => (
+                  <Table.Cell key={column.key} textAlign={column.align} borderColor="border.muted">
+                    {column.skeleton ?? <CusSkeleton height="4" width={column.key === 'actions' ? '6' : '70%'} />}
+                  </Table.Cell>
+                ))}
+              </Table.Row>
+            ))
+          ) : data.length === 0 ? (
             <Table.Row>
               <Table.Cell colSpan={columns.length}>
-                {isLoading ? <CusSpinner fullArea /> : <CusEmptyState size="sm" title={emptyText} />}
+                <CusEmptyState size="sm" title={emptyText} />
               </Table.Cell>
             </Table.Row>
           ) : (

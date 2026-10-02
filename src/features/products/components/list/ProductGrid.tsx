@@ -1,5 +1,6 @@
 import { Check, Eye, Heart } from 'lucide-react'
 import type { StoreProduct } from '@/api/routes/stores-products/storeProducts.types'
+import { CusSkeleton } from '@/components/ui/skeleton/CusSkeleton'
 import type { CategoryTree } from '@/features/categories/utils/categoryTree'
 import { useDiscountRules } from '@/features/discounts/api-hooks/useDiscounts'
 import { cn } from '@/utils/cn'
@@ -18,6 +19,9 @@ const COLUMNS: Record<GridLayout, string> = {
   grid6: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6',
   grid4: 'grid-cols-1 md:grid-cols-2 2xl:grid-cols-4',
 }
+
+/** Yuklanayotganda nechta karta shakli ko'rsatiladi (bir-ikki qator) */
+const SKELETON_COUNT: Record<GridLayout, number> = { grid12: 24, grid8: 16, grid6: 12, grid4: 8 }
 
 interface ProductGridProps {
   products: StoreProduct[]
@@ -38,8 +42,23 @@ export function ProductGrid({ products, tree, layout, isLoading, onAction, selec
   if (isLoading) {
     return (
       <div className={cn('grid gap-4', COLUMNS[layout])}>
-        {Array.from({ length: 8 }, (_, index) => (
-          <div key={index} className="aspect-3/4 animate-pulse rounded-card bg-hover" />
+        {Array.from({ length: SKELETON_COUNT[layout] }, (_, index) => (
+          <div
+            key={index}
+            className={cn('overflow-hidden rounded-card bg-surface shadow-card', horizontal ? 'flex gap-3 p-3' : 'flex flex-col')}
+          >
+            <div className={cn('shrink-0', horizontal && 'w-28 sm:w-32')}>
+              <div className="aspect-3/4 w-full">
+                <CusSkeleton height="full" borderRadius={horizontal ? 'l2' : '0'} />
+              </div>
+            </div>
+            <div className={cn('flex flex-1 flex-col', horizontal ? 'gap-2 py-0.5' : compact ? 'gap-1.5 p-1.5' : 'gap-2 p-2.5')}>
+              <CusSkeleton height="3.5" width="75%" />
+              {!compact && layout !== 'grid8' && <CusSkeleton height="3" width="50%" />}
+              <CusSkeleton height="3.5" width="40%" />
+              {horizontal && <CusSkeleton height="5" width="30%" />}
+            </div>
+          </div>
         ))}
       </div>
     )

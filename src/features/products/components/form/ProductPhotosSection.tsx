@@ -10,7 +10,6 @@ import {
   assignAll,
   freeSlots,
   movePhoto,
-  patchPhoto,
   pendingPhotoIds,
   POOL,
   refreshPhotos,

@@ -40,7 +40,6 @@ style/chakra-system.ts  Chakra tokens bound to index.css vars (preflight off)
 index.css         Tailwind @theme tokens (colors, text scale, radius, spacing) + accent scales + dark overrides
 utils/            cn(), navigate(), media (mediaUrl, photoUrl), format (formatPrice/Date/Compact), slugify,
                   phone (CusPhoneInput keeps 9 digits: parseUzPhone ← API, toUzPhone → API, displayUzPhone), validate (isEmail, isUrl, normalizeUrl)
-data/dashboard.ts mock data for dashboard
 pages/admin/DevUI.tsx  /preview-dev — live demo of every Cus* component (look here for usage examples)
 ```
 
@@ -87,5 +86,5 @@ Adding a page = 1) `features/x/FeatureX.tsx`, 2) `pages/admin/X.tsx`, 3) entry i
 - Shell: no python; use node -e or Edit/Write. Avoid backticks inside bash heredocs/strings.
 
 ## Status
-Done: auth, layout, UI kit, dashboard (mock), settings accent, categories, products (table + URL filters, 3-step create/edit modal, price modal, duplicate), store (/store: info, addresses, contacts, services, social links, colors, tags, materials, material groups). news + discounts (CrudSection jadval, NewsModal/DiscountModal; holat muddatdan hisoblanadi: utils/schedule.ts — boshlanmagan=draft, muddat ichida=active, tugagan=archived; faol chegirma mahsulot narxida eski narx chizilib ko'rinadi: discounts/utils/discountPrice.ts).
+Done: auth, layout, UI kit, dashboard (haqiqiy: reports + orders, davr tanlagichi, features/dashboard), settings accent, categories, products (table + URL filters, 3-step create/edit modal, price modal, duplicate), store (/store: info, addresses, contacts, services, social links, colors, tags, materials, material groups). news + discounts (CrudSection jadval, NewsModal/DiscountModal; holat muddatdan hisoblanadi: utils/schedule.ts — boshlanmagan=draft, muddat ichida=active, tugagan=archived; faol chegirma mahsulot narxida eski narx chizilib ko'rinadi: discounts/utils/discountPrice.ts).
 Open: Icon.name meaning (lucide name?) unknown — services show it as text.

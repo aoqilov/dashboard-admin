@@ -1,40 +1,63 @@
+import { useState } from 'react'
 import { PageGrid } from '@/components/layout/admin/PageGrid'
-import { AnalyticCard } from './components/AnalyticCard'
-import { BookingOverview } from './components/BookingOverview'
-import { ExpensesCard } from './components/ExpensesCard'
-import { SaleByLocation } from './components/SaleByLocation'
-import { TotalEarning } from './components/TotalEarning'
-import { TravelSalesStats } from './components/TravelSalesStats'
-import { WeatherCard } from './components/WeatherCard'
+import { PageHeader } from '@/components/shared/page-header/PageHeader'
+import { CusSegment } from '@/components/ui/segment/CusSegment'
+import { ActiveContentCard } from './components/ActiveContentCard'
+import { AttentionCard } from './components/AttentionCard'
+import { OrdersChart } from './components/OrdersChart'
+import { OrderStatusCard } from './components/OrderStatusCard'
+import { PopularCategoriesCard } from './components/PopularCategoriesCard'
+import { StatCards } from './components/StatCards'
+import { TopProductsCard } from './components/TopProductsCard'
+import { PERIODS } from './utils/dashboard'
 
 /**
- * Desktop (xl) joylashuvi:
- *  [ Sales Stats 6 ][ Analytic 3 ][ Expenses 3 ]
- *  [ Booking 5 ][ Weather+Earning 3 ][ Location 4 ]
+ * Do'kon dashboardi (xl joylashuvi):
+ *  [ 4 ta raqamli karta ]
+ *  [ Buyurtmalar dinamikasi 8 ][ Buyurtmalar holati 4 ]
+ *  [ Ko'p ko'rilgan 6 ][ Ko'p saqlangan 6 ]
+ *  [ Mashhur kategoriyalar 4 ][ Faol chegirma/yangilik 4 ][ Diqqat talab qiladi 4 ]
+ * Davr tanlagichi buyurtma va hisobotlarga ta'sir qiladi.
  */
 export default function FeatureDashboard() {
-  return (
-    <PageGrid>
-      <div className="col-span-12 xl:col-span-6">
-        <TravelSalesStats />
-      </div>
-      <div className="col-span-12 md:col-span-6 xl:col-span-3">
-        <AnalyticCard />
-      </div>
-      <div className="col-span-12 md:col-span-6 xl:col-span-3">
-        <ExpensesCard />
-      </div>
+  const [period, setPeriod] = useState('30')
+  const days = Number(period)
 
-      <div className="col-span-12 xl:col-span-5">
-        <BookingOverview />
-      </div>
-      <div className="col-span-12 flex flex-col gap-4 md:col-span-5 md:gap-6 xl:col-span-3">
-        <WeatherCard />
-        <TotalEarning />
-      </div>
-      <div className="col-span-12 md:col-span-7 xl:col-span-4">
-        <SaleByLocation />
-      </div>
-    </PageGrid>
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Dashboard"
+        description="Do'kon holati: buyurtmalar, mashhur mahsulotlar va e'tibor talab qiladigan joylar"
+        actions={<CusSegment size="sm" value={period} onChange={setPeriod} items={PERIODS} />}
+      />
+
+      <PageGrid>
+        <StatCards />
+
+        <div className="col-span-12 xl:col-span-8">
+          <OrdersChart days={days} />
+        </div>
+        <div className="col-span-12 md:col-span-6 xl:col-span-4">
+          <OrderStatusCard days={days} />
+        </div>
+
+        <div className="col-span-12 xl:col-span-6">
+          <TopProductsCard kind="viewed" days={days} />
+        </div>
+        <div className="col-span-12 xl:col-span-6">
+          <TopProductsCard kind="favorited" days={days} />
+        </div>
+
+        <div className="col-span-12 md:col-span-6 xl:col-span-4">
+          <PopularCategoriesCard days={days} />
+        </div>
+        <div className="col-span-12 md:col-span-6 xl:col-span-4">
+          <ActiveContentCard />
+        </div>
+        <div className="col-span-12 xl:col-span-4">
+          <AttentionCard />
+        </div>
+      </PageGrid>
+    </div>
   )
 }

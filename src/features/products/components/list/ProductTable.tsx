@@ -3,6 +3,7 @@ import type { StoreProduct } from '@/api/routes/stores-products/storeProducts.ty
 import { CusTable, type TableColumn } from '@/components/ui/table/CusTable'
 import type { CategoryTree } from '@/features/categories/utils/categoryTree'
 import { useDiscountRules } from '@/features/discounts/api-hooks/useDiscounts'
+import { CusSkeleton } from '@/components/ui/skeleton/CusSkeleton'
 import { cn } from '@/utils/cn'
 import { formatCompact, formatDate } from '@/utils/format'
 import { categoryPath, productCover } from '../../utils/productView'
@@ -26,6 +27,7 @@ export function ProductTable({ products, tree, isLoading, emptyText, onAction, s
     key: 'select',
     header: '',
     width: '48px',
+    skeleton: <CusSkeleton height="5" width="5" />,
     render: (product) => {
       const isOn = selection?.ids.has(product.id)
       return (
@@ -46,6 +48,15 @@ export function ProductTable({ products, tree, isLoading, emptyText, onAction, s
     {
       key: 'name',
       header: 'Mahsulot',
+      skeleton: (
+        <div className="flex min-w-55 items-center gap-3">
+          <CusSkeleton height="11" width="11" />
+          <div className="flex flex-1 flex-col gap-2">
+            <CusSkeleton height="3.5" width="60%" />
+            <CusSkeleton height="3" width="35%" />
+          </div>
+        </div>
+      ),
       render: (product) => (
         <div className="flex min-w-55 items-center gap-3">
           <ProductImage src={productCover(product)} className="size-11 rounded-control" />
