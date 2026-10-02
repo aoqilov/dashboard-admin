@@ -2,6 +2,7 @@ import { ImageOff } from 'lucide-react'
 import type { StoreProduct } from '@/api/routes/stores-products/storeProducts.types'
 import { CusBadge } from '@/components/ui/badge/CusBadge'
 import { cn } from '@/utils/cn'
+import { saleDiscount, type DiscountRule } from '@/features/discounts/utils/discountPrice'
 import { formatPrice } from '@/utils/format'
 
 /** Mahsulot rasmi yoki bo'sh joy belgisi */
@@ -26,11 +27,21 @@ export function AvailabilityBadges({ product }: { product: StoreProduct }) {
   )
 }
 
-/** Asosiy narx + ikkinchi darajali narx (ijara) */
-export function ProductPrice({ product }: { product: StoreProduct }) {
+/** Asosiy narx + ikkinchi darajali narx (ijara). Faol chegirma bo'lsa — yangi narx tepada, eski narx qizil va chizilgan */
+export function ProductPrice({ product, rules }: { product: StoreProduct; rules?: DiscountRule[] }) {
   const sale = product.is_sellable ? formatPrice(product.price_sale) : null
   const rental = product.is_rentable ? formatPrice(product.price_rental) : null
+  const discount = saleDiscount(product, rules)
   if (!sale && !rental) return <span className="text-sm text-subtle">—</span>
+  if (discount && sale) {
+    return (
+      <div className="leading-tight">
+        <p className="text-sm font-semibold text-heading">{formatPrice(discount.price)}</p>
+        <p className="mt-0.5 text-xs text-danger line-through">{sale}</p>
+        {rental && <p className="mt-0.5 text-xs text-muted">ijara {rental}</p>}
+      </div>
+    )
+  }
   return (
     <div className="leading-tight">
       <p className="text-sm font-medium text-heading">{sale ?? rental}</p>

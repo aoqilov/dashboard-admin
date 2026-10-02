@@ -29,7 +29,8 @@ export interface StoreProduct {
   tags?: number[]
   /** StoreColor id */
   color?: number | null
-  size?: number | null
+  /** Mavjud o'lchamlar: [39, 40, 41] */
+  size?: number[] | null
   price_sale?: string | null
   price_rental?: string | null
   price_tailoring?: string | null
@@ -54,7 +55,7 @@ export interface StoreProductRequest {
   slug: string
   tags?: number[]
   color?: number | null
-  size?: number | null
+  size?: number[]
   price_sale?: string | null
   price_rental?: string | null
   price_tailoring?: string | null

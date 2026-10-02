@@ -7,6 +7,7 @@ import { CatalogItemDialog } from '@/features/catalog/modals/CatalogItemDialog'
 import type { CatalogKind } from '@/features/catalog/utils/catalogKinds'
 import { cn } from '@/utils/cn'
 import type { SectionProps } from '../../utils/productForm'
+import { SizeChips } from '../shared/SizeChips'
 import { FormSection } from './FormSection'
 
 /** Oq/och ranglar ustida belgi qora bo'lsin */
@@ -117,15 +118,12 @@ export function AttributesSection({ values, errors, set }: SectionProps) {
         </div>
       </div>
 
-      <CusInput
-        className="sm:max-w-[calc(50%-10px)]"
-        label="O'lcham"
-        inputMode="numeric"
-        placeholder="44"
-        value={values.size}
-        error={errors.size}
-        onChange={(event) => set('size', event.target.value.replace(/\D/g, ''))}
-      />
+      {/* O'lchamlar: bir nechtasini tanlash mumkin */}
+      <div className="flex flex-col gap-2.5">
+        <span className="text-sm font-medium text-content">O'lcham</span>
+        <SizeChips value={values.size} onChange={(sizes) => set('size', sizes)} />
+        {errors.size && <p className="text-xs text-danger">{errors.size}</p>}
+      </div>
 
       {/* Materiallar: guruhlangan chip'lar */}
       <div className="flex flex-col gap-2.5">

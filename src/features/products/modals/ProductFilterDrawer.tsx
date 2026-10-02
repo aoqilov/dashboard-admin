@@ -7,6 +7,7 @@ import { CusSegment } from '@/components/ui/segment/CusSegment'
 import { CusCombobox } from '@/components/ui/select/CusCombobox'
 import { CusLabel } from '@/components/ui/typography/CusTypography'
 import { useMaterials, useTags } from '@/features/catalog/api-hooks/useCatalog'
+import { SizeChips } from '../components/shared/SizeChips'
 import { ADVANCED_KEYS, parseIds, type FilterKey, type ProductFilters } from '../utils/useProductFilters'
 
 interface ProductFilterDrawerProps {
@@ -130,7 +131,9 @@ export function ProductFilterDrawer({ open, onOpenChange, filters, onApply }: Pr
         </div>
         <Field label="Sotuv narxi, so'm">{rangeInputs('price_min', 'price_max', ['dan', 'gacha'])}</Field>
         <Field label="Ijara narxi, so'm">{rangeInputs('rent_min', 'rent_max', ['dan', 'gacha'])}</Field>
-        <Field label="O'lcham">{rangeInputs('size_min', 'size_max', ['dan (40)', 'gacha (46)'])}</Field>
+        <Field label="O'lcham">
+          <SizeChips value={parseIds(draft.sizes ?? '')} onChange={(sizes) => set('sizes', sizes.join(','))} />
+        </Field>
         <Field label="Qo'shilgan sana">
           <div className="grid grid-cols-2 gap-3">
             <CusDatePicker

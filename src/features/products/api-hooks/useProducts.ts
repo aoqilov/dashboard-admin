@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { GetAllRequest } from '@/api/common.types'
+import { fetchAll } from '@/api/fetchAll'
 import { storeProducts } from '@/api/routes/stores-products/storeProducts.api'
 import type { StoreProductUpdateRequest } from '@/api/routes/stores-products/storeProducts.types'
 
@@ -15,6 +16,11 @@ export function useProducts(body: GetAllRequest) {
     queryFn: () => storeProducts.getAll(body),
     placeholderData: keepPreviousData,
   })
+}
+
+/** Barcha mahsulotlar — tanlash ro'yxatlari uchun (yangilik, chegirma) */
+export function useAllProducts() {
+  return useQuery({ queryKey: [...productKeys.all, 'all'], queryFn: () => fetchAll(storeProducts.getAll) })
 }
 
 export function useProductMutations() {

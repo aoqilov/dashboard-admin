@@ -48,9 +48,7 @@ export function ActiveFilterChips({ filters, tree, onRemove, onClear }: ActiveFi
   if (filters.rent_min || filters.rent_max) {
     chips.push({ keys: ['rent_min', 'rent_max'], label: `Ijara ${between(filters.rent_min, filters.rent_max)}` })
   }
-  if (filters.size_min || filters.size_max) {
-    chips.push({ keys: ['size_min', 'size_max'], label: `O'lcham ${between(filters.size_min, filters.size_max)}` })
-  }
+  if (filters.sizes) chips.push({ keys: ['sizes'], label: `O'lcham: ${parseIds(filters.sizes).join(', ')}` })
   if (filters.date_from || filters.date_to) {
     chips.push({
       keys: ['date_from', 'date_to'],

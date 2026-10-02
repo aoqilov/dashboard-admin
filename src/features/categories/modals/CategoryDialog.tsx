@@ -5,6 +5,7 @@ import { CusButton } from '@/components/ui/buttons/CusButton'
 import { CusDialog } from '@/components/ui/dialog/CusDialog'
 import { CusFileUpload } from '@/components/ui/inputs/CusFileUpload'
 import { CusInput } from '@/components/ui/inputs/CusInput'
+import { CusSwitch } from '@/components/ui/inputs/CusSwitch'
 import { CusLabel } from '@/components/ui/typography/CusTypography'
 import { toaster } from '@/components/ui/toaster/toaster'
 import { useCategoryMutations } from '../api-hooks/useCategories'
@@ -24,6 +25,7 @@ export function CategoryDialog({ open, onOpenChange, category, parent }: Categor
   const { create, update } = useCategoryMutations()
   const [name, setName] = useState(category?.name ?? '')
   const [cover, setCover] = useState<File | null>(null)
+  const [visible, setVisible] = useState(category?.visible ?? true)
   const [error, setError] = useState<string>()
 
   const isEdit = Boolean(category)
@@ -36,14 +38,15 @@ export function CategoryDialog({ open, onOpenChange, category, parent }: Categor
     if (!name.trim()) return setError('Nomini kiriting')
 
     // Rasm bo'lsa — FormData, aks holda JSON
-    let body: FormData | { name: string; parent?: number | null }
+    let body: FormData | { name: string; visible: boolean; parent?: number | null }
     if (cover) {
       body = new FormData()
       body.append('name', name.trim())
+      body.append('visible', String(visible))
       if (!isEdit && parent) body.append('parent', String(parent.id))
       body.append('cover', cover)
     } else {
-      body = isEdit ? { name: name.trim() } : { name: name.trim(), parent: parent?.id ?? null }
+      body = isEdit ? { name: name.trim(), visible } : { name: name.trim(), visible, parent: parent?.id ?? null }
     }
 
     try {
@@ -103,6 +106,9 @@ export function CategoryDialog({ open, onOpenChange, category, parent }: Categor
             description="PNG, JPG yoki WEBP"
           />
         </div>
+        <CusSwitch checked={visible} onChange={setVisible}>
+          Saytda ko'rinadi
+        </CusSwitch>
       </form>
     </CusDialog>
   )

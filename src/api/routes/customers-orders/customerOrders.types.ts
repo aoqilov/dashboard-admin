@@ -4,6 +4,7 @@ export type { StoreOrder } from '../stores-orders/storeOrders.types'
 
 export interface OrderItemCreateRequest {
   product: number
+  size?: number | null
   quantity: number
   price_type: PriceType
 }

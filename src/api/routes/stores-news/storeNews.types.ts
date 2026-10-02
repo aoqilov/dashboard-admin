@@ -1,4 +1,5 @@
 import type { ContentStatus } from '../../common.types'
+import type { StoreProductPhoto } from '../stores-product-photos/storeProductPhotos.types'
 
 export type NewsType = 'event' | 'discount' | 'holiday' | 'other'
 
@@ -8,6 +9,8 @@ export interface StoreNews {
   news_type: NewsType
   slug: string
   description?: string
+  /** Rasm (nusxalari bilan) */
+  image?: StoreProductPhoto | null
   starts_at: string
   ends_at: string
   status?: ContentStatus
@@ -26,6 +29,8 @@ export interface StoreNewsRequest {
   ends_at: string
   status?: ContentStatus
   products?: number[]
+  /** Rasm fayli. Yuborilsa — multipart/form-data */
+  image?: File | Blob | null
 }
 
 export type StoreNewsUpdateRequest = Partial<StoreNewsRequest>

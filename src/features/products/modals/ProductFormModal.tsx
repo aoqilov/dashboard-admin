@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { getErrorMessage } from '@/api/api-config/apiError'
+import { storeProductPhotos } from '@/api/routes/stores-product-photos/storeProductPhotos.api'
 import type { StoreProduct } from '@/api/routes/stores-products/storeProducts.types'
 import { CusButton } from '@/components/ui/buttons/CusButton'
 import { CusDialog } from '@/components/ui/dialog/CusDialog'
@@ -13,9 +14,12 @@ import { useProductMutations } from '../api-hooks/useProducts'
 import { AttributesSection } from '../components/form/AttributesSection'
 import { BasicSection } from '../components/form/BasicSection'
 import { ClassificationSection } from '../components/form/ClassificationSection'
+import { TagsSection } from '../components/form/TagsSection'
 import { FormSection } from '../components/form/FormSection'
 import { PricingSection } from '../components/form/PricingSection'
 import { ProductPhotosSection } from '../components/form/ProductPhotosSection'
+import { FORM_COLUMN, FORM_COLUMNS } from '../utils/formLayout'
+import { patchPhoto, type PhotoState } from '../utils/photoState'
 import {
   duplicateValues,
   firstStepWithError,
@@ -28,7 +32,6 @@ import {
   validate,
   type ProductFormErrors,
   type ProductFormValues,
-  type VariantDraft,
 } from '../utils/productForm'
 
 interface ProductFormModalProps {
@@ -41,8 +44,8 @@ interface ProductFormModalProps {
 }
 
 /**
- * Mahsulot qo'shish / tahrirlash — 2 qadam:
- * 1) asosiy ma'lumot (barcha majburiy maydonlar), 2) rasmlar va xususiyatlar.
+ * Mahsulot qo'shish / tahrirlash — 3 qadam:
+ * 1) nom va tasnif, 2) narx va xususiyatlar, 3) rasmlar.
  * Tashqariga bosilganda yopilmaydi; saqlanmagan o'zgarish bo'lsa yopishdan oldin so'raladi.
  */
 export function ProductFormModal({ open, onOpenChange, product, source }: ProductFormModalProps) {
@@ -65,12 +68,15 @@ export function ProductFormModal({ open, onOpenChange, product, source }: Produc
     setDirty(true)
   }, [])
 
-  const setVariants = useCallback((updater: (prev: VariantDraft[]) => VariantDraft[]) => {
-    setValues((prev) => ({ ...prev, variants: updater(prev.variants) }))
+  /** 3-qadam: variantlar va joylanmagan rasmlar birga o'zgaradi (sudrash, yuklash) */
+  const setPhotos = useCallback((updater: (prev: PhotoState) => PhotoState) => {
+    setValues((prev) => ({ ...prev, ...updater({ variants: prev.variants, pool: prev.pool }) }))
+    setErrors((prev) => (prev.pool ? { ...prev, pool: undefined } : prev))
     setDirty(true)
   }, [])
 
-  const isUploading = values.variants.some((variant) => variant.photos.some((item) => !item.photo && !item.error))
+  /** Saqlash paytida variantlardagi yangi rasmlar yuklanmoqda */
+  const [isUploading, setUploading] = useState(false)
   const isSaving = create.isPending || update.isPending
 
   /** Qadam almashganda modal ichi tepaga qaytadi (content — Dialog.Body ning bevosita bolasi) */
@@ -91,10 +97,51 @@ export function ProductFormModal({ open, onOpenChange, product, source }: Produc
     )
   }
 
+  const isLastStep = step === PRODUCT_STEPS.length - 1
+
+  /** Keyingi qadamga faqat shu qadamdagi maydonlar to'g'ri bo'lsa o'tiladi */
   const handleNext = () => {
-    const errorsHere = stepErrors(validate(values), 0)
+    const errorsHere = stepErrors(validate(values), step)
     if (hasErrors(errorsHere)) return showErrors(errorsHere)
-    goToStep(1)
+    goToStep(step + 1)
+  }
+
+  /**
+   * Variantlarga qo'yilgan, hali yuklanmagan rasmlarni serverga yuklaydi (joylanmaganlari yuklanmaydi).
+   * Yuklanganlari formaga yoziladi — qayta saqlashda takror yuklanmaydi. Biri yuklanmasa xato tashlanadi.
+   */
+  const uploadVariantPhotos = async () => {
+    const pending = values.variants.flatMap((variant) => variant.photos).filter((item) => !item.photo && item.file)
+    if (!pending.length) return values
+
+    setUploading(true)
+    setValues((prev) => pending.reduce((acc, item) => ({ ...acc, ...patchPhoto(acc, item.key, { uploading: true, error: undefined }) }), prev))
+    try {
+      const results = await Promise.allSettled(
+        pending.map(async (item) => {
+          const form = new FormData()
+          form.append('image', item.file!)
+          return storeProductPhotos.create(form)
+        }),
+      )
+
+      let next = values
+      let failed: unknown
+      results.forEach((result, index) => {
+        const key = pending[index].key
+        if (result.status === 'fulfilled') {
+          next = { ...next, ...patchPhoto(next, key, { photo: result.value, uploading: false, error: undefined }) }
+        } else {
+          failed ??= result.reason
+          next = { ...next, ...patchPhoto(next, key, { uploading: false, error: getErrorMessage(result.reason, 'Yuklanmadi') }) }
+        }
+      })
+      setValues(next)
+      if (failed) throw failed
+      return next
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleSave = async () => {
@@ -104,13 +151,8 @@ export function ProductFormModal({ open, onOpenChange, product, source }: Produc
       toaster.create({ type: 'error', title: "Belgilangan maydonlarni to'ldiring" })
       return
     }
-    if (isUploading) {
-      toaster.create({ type: 'info', title: 'Rasmlar hali yuklanmoqda, biroz kuting' })
-      return
-    }
-
     try {
-      const body = toRequest(values)
+      const body = toRequest(await uploadVariantPhotos())
       if (product) await update.mutateAsync({ id: product.id, body })
       else await create.mutateAsync(body)
       toaster.create({ type: 'success', title: product ? 'Saqlandi' : "Mahsulot qo'shildi" })
@@ -129,7 +171,7 @@ export function ProductFormModal({ open, onOpenChange, product, source }: Produc
   const description = product
     ? `${product.name} · Ko'rishlar: ${formatCompact(product.views)} · Saqlaganlar: ${formatCompact(product.in_customers_saved)} · Yangilangan: ${formatDate(product.updated_at)}`
     : source
-      ? `"${source.name}" asosida. Rasmlarni 2-qadamda qo'shing`
+      ? `"${source.name}" asosida. Rasmlarni 3-qadamda qo'shing`
       : undefined
 
   const sectionProps = { values, errors, set }
@@ -140,7 +182,7 @@ export function ProductFormModal({ open, onOpenChange, product, source }: Produc
       <CusDialog
         open={open}
         onOpenChange={(next) => !next && requestClose()}
-        size="xl"
+        size="cover"
         isPersistent
         scrollBehavior="inside"
         title={title}
@@ -150,26 +192,28 @@ export function ProductFormModal({ open, onOpenChange, product, source }: Produc
           <div className="flex w-full flex-wrap items-center justify-end gap-3">
             {status && <span className="mr-auto hidden text-xs text-muted sm:block">{status}</span>}
             {step === 0 ? (
+              <CusButton variant="outline" onClick={requestClose}>
+                Bekor qilish
+              </CusButton>
+            ) : (
+              <CusButton variant="outline" leftIcon={<ArrowLeft />} onClick={() => goToStep(step - 1)}>
+                Orqaga
+              </CusButton>
+            )}
+            {isLastStep ? (
+              <CusButton onClick={handleSave} isLoading={isSaving || isUploading} isDisabled={isEdit && !dirty}>
+                {isEdit ? 'Saqlash' : "Mahsulotni qo'shish"}
+              </CusButton>
+            ) : (
               <>
-                <CusButton variant="outline" onClick={requestClose}>
-                  Bekor qilish
-                </CusButton>
+                {/* Tahrirlashda oxirgi qadamga borish shart emas */}
                 {isEdit && (
-                  <CusButton variant="outline" onClick={handleSave} isLoading={isSaving} isDisabled={!dirty}>
+                  <CusButton variant="outline" onClick={handleSave} isLoading={isSaving || isUploading} isDisabled={!dirty}>
                     Saqlash
                   </CusButton>
                 )}
                 <CusButton rightIcon={<ArrowRight />} onClick={handleNext}>
                   Keyingi
-                </CusButton>
-              </>
-            ) : (
-              <>
-                <CusButton variant="outline" leftIcon={<ArrowLeft />} onClick={() => goToStep(0)}>
-                  Orqaga
-                </CusButton>
-                <CusButton onClick={handleSave} isLoading={isSaving} isDisabled={isEdit && !dirty}>
-                  {isEdit ? 'Saqlash' : "Mahsulotni qo'shish"}
                 </CusButton>
               </>
             )}
@@ -179,29 +223,49 @@ export function ProductFormModal({ open, onOpenChange, product, source }: Produc
         <div ref={contentRef} className="flex flex-col gap-6">
           <CusSteps size="sm" step={step} items={PRODUCT_STEPS} />
 
-          {step === 0 ? (
-            <div className="flex flex-col divide-y divide-border">
-              <BasicSection {...sectionProps} slugLocked={slugLocked} onSlugLock={() => setSlugLocked(true)} />
-              <ClassificationSection {...sectionProps} />
-              <PricingSection {...sectionProps} />
+          {step === 0 && (
+            <div className={FORM_COLUMNS}>
+              <div className={FORM_COLUMN}>
+                <BasicSection {...sectionProps} slugLocked={slugLocked} onSlugLock={() => setSlugLocked(true)} />
+                <TagsSection {...sectionProps} />
+              </div>
+              <div className={FORM_COLUMN}>
+                <ClassificationSection {...sectionProps} />
+              </div>
             </div>
-          ) : (
-            <div className="flex flex-col divide-y divide-border">
-              <ProductPhotosSection variants={values.variants} setVariants={setVariants} />
-              <AttributesSection {...sectionProps} />
-              <FormSection title="Saytda ko'rinishi">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-heading">Rasmlarni xira ko'rsatish</p>
-                    <p className="text-xs text-muted">Mahsulot saytda bor, lekin rasmlari to'liq ko'rinmaydi</p>
+          )}
+
+          {step === 1 && (
+            <div className={FORM_COLUMNS}>
+              <div className={FORM_COLUMN}>
+                <PricingSection {...sectionProps} />
+              </div>
+              <div className={FORM_COLUMN}>
+                <AttributesSection {...sectionProps} />
+                <FormSection title="Saytda ko'rinishi">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-heading">Rasmlarni xira ko'rsatish</p>
+                      <p className="text-xs text-muted">Mahsulot saytda bor, lekin rasmlari to'liq ko'rinmaydi</p>
+                    </div>
+                    <CusSwitch
+                      checked={values.blur_image_in_site}
+                      onChange={(checked) => set('blur_image_in_site', checked)}
+                    />
                   </div>
-                  <CusSwitch
-                    checked={values.blur_image_in_site}
-                    onChange={(checked) => set('blur_image_in_site', checked)}
-                  />
-                </div>
-              </FormSection>
+                </FormSection>
+              </div>
             </div>
+          )}
+
+          {/* Rasmlar — butun en bo'ylab */}
+          {step === 2 && (
+            <ProductPhotosSection
+              variants={values.variants}
+              pool={values.pool}
+              error={errors.pool}
+              onChange={setPhotos}
+            />
           )}
         </div>
       </CusDialog>

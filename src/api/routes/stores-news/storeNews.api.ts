@@ -13,12 +13,12 @@ export const storeNews = {
     return data
   },
 
-  async create(body: StoreNewsRequest) {
+  async create(body: StoreNewsRequest | FormData) {
     const { data } = await api.post<StoreNews>('/stores/news/', body)
     return data
   },
 
-  async update(id: number, body: StoreNewsUpdateRequest) {
+  async update(id: number, body: StoreNewsUpdateRequest | FormData) {
     const { data } = await api.patch<StoreNews>(`/stores/news/${id}/`, body)
     return data
   },

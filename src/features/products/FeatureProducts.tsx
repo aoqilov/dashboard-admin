@@ -14,12 +14,21 @@ import { toaster } from '@/components/ui/toaster/toaster'
 import { useColors } from '@/features/catalog/api-hooks/useCatalog'
 import { useCategories } from '@/features/categories/api-hooks/useCategories'
 import { cn } from '@/utils/cn'
+import { DiscountPickPanel } from '@/features/discounts/components/DiscountPickPanel'
+import { NewsPickPanel } from '@/features/news/components/NewsPickPanel'
+import { setDraftProducts, useNewsDraft } from '@/features/news/utils/newsDraft'
+import { setDraftRows, toggleRow, useDiscountDraft } from '@/features/discounts/utils/discountDraft'
 import { useProductMutations, useProducts } from './api-hooks/useProducts'
 import { ActiveFilterChips } from './components/list/ActiveFilterChips'
-import { ProductTable, type ProductAction } from './components/list/ProductTable'
+import { ProductGrid } from './components/list/ProductGrid'
+import { ProductLayoutSwitch } from './components/list/ProductLayoutSwitch'
+import { ProductTable } from './components/list/ProductTable'
+import type { ProductAction } from './components/shared/ProductActionsMenu'
+import { ProductInfoModal } from './modals/ProductInfoModal'
 import { ProductFilterDrawer } from './modals/ProductFilterDrawer'
 import { ProductFormModal } from './modals/ProductFormModal'
 import { ProductPriceModal } from './modals/ProductPriceModal'
+import { useProductLayout } from './utils/productLayout'
 import { PAGE_SIZE, useProductFilters, type FilterKey } from './utils/useProductFilters'
 
 const MODE_OPTIONS = [
@@ -37,10 +46,14 @@ export default function FeatureProducts() {
   const { data: tree } = useCategories()
   const { data: colors = [] } = useColors()
   const { remove } = useProductMutations()
+  const { draft, picking } = useDiscountDraft()
+  const { draft: newsDraft, picking: newsPicking } = useNewsDraft()
+  const [layout, setLayout] = useProductLayout()
 
   const [search, setSearch] = useState(filters.q)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [form, setForm] = useState<FormState | null>(null)
+  const [viewing, setViewing] = useState<StoreProduct | null>(null)
   const [pricing, setPricing] = useState<StoreProduct | null>(null)
   const [toDelete, setToDelete] = useState<StoreProduct | null>(null)
 
@@ -62,7 +75,32 @@ export default function FeatureProducts() {
   const subcategories = filters.category ? (tree?.childrenOf.get(Number(filters.category)) ?? []) : []
   const hasFilters = activeCount > 0
 
+  /** Chegirma tanlash rejimi: mahsulotni tanlash/bekor qilish (narxsiz mahsulot tanlanmaydi) */
+  const selection =
+    picking && draft
+      ? {
+          ids: new Set(draft.rows.map((row) => Number(row.product))),
+          onToggle: (product: StoreProduct) => {
+            if (!product.price_sale && !draft.rows.some((row) => row.product === String(product.id))) {
+              return toaster.create({ type: 'error', title: "Bu mahsulotning sotuv narxi yo'q" })
+            }
+            setDraftRows(toggleRow(draft.rows, product))
+          },
+        }
+      : newsPicking && newsDraft
+        ? {
+            ids: new Set(newsDraft.products),
+            onToggle: (product: StoreProduct) =>
+              setDraftProducts(
+                newsDraft.products.includes(product.id)
+                  ? newsDraft.products.filter((id) => id !== product.id)
+                  : [...newsDraft.products, product.id],
+              ),
+          }
+        : undefined
+
   const handleAction = (action: ProductAction, product: StoreProduct) => {
+    if (action === 'view') setViewing(product)
     if (action === 'edit') setForm({ product })
     if (action === 'price') setPricing(product)
     if (action === 'duplicate') setForm({ source: product })
@@ -99,11 +137,25 @@ export default function FeatureProducts() {
   const isEmpty = !isLoading && products.length === 0
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={cn(selection && 'grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_400px]')}>
+    <div className="flex min-w-0 flex-col gap-6">
       <PageHeader
         title="Mahsulotlar"
-        description={data ? `Jami ${data.total} ta mahsulot` : "Do'kondagi barcha mahsulotlar"}
-        actions={newButton}
+        description={
+          selection
+            ? picking
+              ? "Chegirma uchun tanlash: mahsulot qatorini bosing, o'ng tomonda chegirma qo'shiladi"
+              : "Yangilik uchun tanlash: mahsulotni bosing, o'ng tomonda ro'yxatga qo'shiladi"
+            : data
+              ? `Jami ${data.total} ta mahsulot`
+              : "Do'kondagi barcha mahsulotlar"
+        }
+        actions={
+          <>
+            <ProductLayoutSwitch value={layout} onChange={setLayout} />
+            {!selection && newButton}
+          </>
+        }
       />
 
       <CusCard className="flex flex-col gap-4 p-4 sm:p-4">
@@ -182,9 +234,28 @@ export default function FeatureProducts() {
           )}
         </CusCard>
       ) : (
-        <CusCard className={cn('p-0 transition-opacity sm:p-0', isFetching && !isLoading && 'opacity-60')}>
-          <ProductTable products={products} tree={tree} isLoading={isLoading} onAction={handleAction} />
-        </CusCard>
+        layout === 'table' ? (
+          <CusCard className={cn('p-0 transition-opacity sm:p-0', isFetching && !isLoading && 'opacity-60')}>
+            <ProductTable
+              products={products}
+              tree={tree}
+              isLoading={isLoading}
+              onAction={handleAction}
+              selection={selection}
+            />
+          </CusCard>
+        ) : (
+          <div className={cn('transition-opacity', isFetching && !isLoading && 'opacity-60')}>
+            <ProductGrid
+              products={products}
+              tree={tree}
+              layout={layout}
+              isLoading={isLoading}
+              onAction={handleAction}
+              selection={selection}
+            />
+          </div>
+        )
       )}
 
       {data && data.total > PAGE_SIZE && (
@@ -214,6 +285,18 @@ export default function FeatureProducts() {
         />
       )}
 
+      {viewing && (
+        <ProductInfoModal
+          product={viewing}
+          open
+          onOpenChange={(open) => !open && setViewing(null)}
+          onEdit={(product) => {
+            setViewing(null)
+            setForm({ product })
+          }}
+        />
+      )}
+
       {pricing && (
         <ProductPriceModal product={pricing} open onOpenChange={(open) => !open && setPricing(null)} />
       )}
@@ -226,6 +309,9 @@ export default function FeatureProducts() {
         onConfirm={handleDelete}
         isLoading={remove.isPending}
       />
+    </div>
+
+    {selection && (picking ? <DiscountPickPanel /> : <NewsPickPanel />)}
     </div>
   )
 }

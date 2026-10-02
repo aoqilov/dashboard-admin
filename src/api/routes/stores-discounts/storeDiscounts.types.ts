@@ -1,4 +1,5 @@
 import type { ContentStatus } from '../../common.types'
+import type { StoreProductPhoto } from '../stores-product-photos/storeProductPhotos.types'
 
 export type DiscountType = 'fixed_amount' | 'percentage'
 
@@ -23,6 +24,8 @@ export interface StoreDiscount {
   id: number
   title: string
   description?: string
+  /** Rasm (nusxalari bilan) */
+  image?: StoreProductPhoto | null
   starts_at?: string | null
   ends_at?: string | null
   status?: ContentStatus
@@ -38,6 +41,8 @@ export interface StoreDiscountRequest {
   ends_at?: string | null
   status?: ContentStatus
   products?: DiscountProductRequest[]
+  /** Rasm fayli. Yuborilsa — multipart/form-data */
+  image?: File | Blob | null
 }
 
 export type StoreDiscountUpdateRequest = Partial<StoreDiscountRequest>

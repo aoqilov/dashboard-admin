@@ -10,6 +10,8 @@ interface CusFormDialogProps {
   onSubmit: (event: FormEvent) => void
   isSaving?: boolean
   size?: 'xs' | 'sm' | 'md' | 'lg'
+  /** Kenglikni qo'lda berish (masalan '1100px') */
+  maxWidth?: string
   submitText?: string
   children: ReactNode
 }
@@ -26,6 +28,7 @@ export function CusFormDialog({
   onSubmit,
   isSaving,
   size = 'md',
+  maxWidth,
   submitText = 'Saqlash',
   children,
 }: CusFormDialogProps) {
@@ -36,6 +39,7 @@ export function CusFormDialog({
       open={open}
       onOpenChange={onOpenChange}
       size={size}
+      maxWidth={maxWidth}
       title={title}
       description={description}
       isPersistent

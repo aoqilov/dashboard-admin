@@ -26,6 +26,8 @@ export interface StoreOrderItem {
   product?: number | null
   /** Buyurtma paytidagi mahsulot nusxasi */
   product_snapshot: unknown
+  /** Buyurtma qilingan o'lcham */
+  size?: number | null
   quantity: number
   price_type: PriceType
   base_price: string

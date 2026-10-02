@@ -13,12 +13,12 @@ export const storeDiscounts = {
     return data
   },
 
-  async create(body: StoreDiscountRequest) {
+  async create(body: StoreDiscountRequest | FormData) {
     const { data } = await api.post<StoreDiscount>('/stores/discounts/', body)
     return data
   },
 
-  async update(id: number, body: StoreDiscountUpdateRequest) {
+  async update(id: number, body: StoreDiscountUpdateRequest | FormData) {
     const { data } = await api.patch<StoreDiscount>(`/stores/discounts/${id}/`, body)
     return data
   },

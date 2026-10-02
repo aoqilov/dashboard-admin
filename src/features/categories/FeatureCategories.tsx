@@ -4,6 +4,7 @@ import { getErrorMessage } from '@/api/api-config/apiError'
 import type { StoreCategory } from '@/api/routes/stores-categories/storeCategories.types'
 import { CusCard } from '@/components/shared/card/CusCard'
 import { PageHeader } from '@/components/shared/page-header/PageHeader'
+import { CusBadge } from '@/components/ui/badge/CusBadge'
 import { CusButton } from '@/components/ui/buttons/CusButton'
 import { CusIconButton } from '@/components/ui/buttons/CusIconButton'
 import { CusDialogDelete } from '@/components/ui/dialog/CusDialogDelete'
@@ -122,6 +123,7 @@ export default function FeatureCategories() {
                         </span>
                         <span className="text-xs text-muted">{count} ta subkategoriya</span>
                       </span>
+                      {root.visible === false && <CusBadge color="dark">Yashirin</CusBadge>}
                       <ChevronRight className={cn('size-4 shrink-0', active ? 'text-primary' : 'text-subtle')} />
                     </button>
                   </li>
@@ -139,7 +141,10 @@ export default function FeatureCategories() {
                   <CusTitle size="lg" className="truncate">
                     {selected.name}
                   </CusTitle>
-                  <p className="text-sm text-muted">Asosiy kategoriya</p>
+                  <p className="flex items-center gap-2 text-sm text-muted">
+                    Asosiy kategoriya
+                    {selected.visible === false && <CusBadge color="dark">Yashirin</CusBadge>}
+                  </p>
                 </div>
                 {actions(selected)}
               </div>
@@ -179,6 +184,7 @@ export default function FeatureCategories() {
                         <span className="min-w-0 flex-1 truncate text-sm text-heading group-hover:text-primary dark:group-hover:text-primary-light">
                           {child.name}
                         </span>
+                        {child.visible === false && <CusBadge color="dark">Yashirin</CusBadge>}
                         <span className="flex shrink-0 items-center gap-1 text-xs text-muted opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
                           Mahsulotlar <ArrowRight className="size-3.5" />
                         </span>

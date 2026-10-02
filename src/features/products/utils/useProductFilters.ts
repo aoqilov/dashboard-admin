@@ -14,8 +14,8 @@ const KEYS = [
   'price_max',
   'rent_min',
   'rent_max',
-  'size_min',
-  'size_max',
+  /** Vergul bilan: '40,42' */
+  'sizes',
   'tags',
   'materials',
   'brand',
@@ -34,7 +34,7 @@ export type ProductFilters = Record<FilterKey, string>
 export const ADVANCED_GROUPS: FilterKey[][] = [
   ['price_min', 'price_max'],
   ['rent_min', 'rent_max'],
-  ['size_min', 'size_max'],
+  ['sizes'],
   ['tags'],
   ['materials'],
   ['brand'],
@@ -85,8 +85,8 @@ export function useProductFilters() {
   if (price) filterBody.price_sale = price
   const rent = range(filters.rent_min, filters.rent_max)
   if (rent) filterBody.price_rental = rent
-  const size = range(filters.size_min, filters.size_max)
-  if (size) filterBody.size = size
+  // Mahsulot o'lchamlari massiv: shu o'lchamlardan biri bor mahsulotlar (IN)
+  if (filters.sizes) filterBody.size = parseIds(filters.sizes)
   // Ro'yxat — IN: shu teglardan/materiallardan biri bor mahsulotlar
   if (filters.tags) filterBody.tags = parseIds(filters.tags)
   if (filters.materials) filterBody.materials = parseIds(filters.materials)

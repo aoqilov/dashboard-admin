@@ -1,15 +1,13 @@
-import { Banknote, Copy, Ellipsis, Eye, Heart, Pencil, Trash2 } from 'lucide-react'
+import { Check, Eye, Heart } from 'lucide-react'
 import type { StoreProduct } from '@/api/routes/stores-products/storeProducts.types'
-import { CusIconButton } from '@/components/ui/buttons/CusIconButton'
-import { CusMenu } from '@/components/ui/menu/CusMenu'
 import { CusTable, type TableColumn } from '@/components/ui/table/CusTable'
 import type { CategoryTree } from '@/features/categories/utils/categoryTree'
+import { useDiscountRules } from '@/features/discounts/api-hooks/useDiscounts'
+import { cn } from '@/utils/cn'
 import { formatCompact, formatDate } from '@/utils/format'
 import { categoryPath, productCover } from '../../utils/productView'
+import { ProductActionsMenu, type ProductAction } from '../shared/ProductActionsMenu'
 import { AvailabilityBadges, ProductImage, ProductPrice } from '../shared/ProductBits'
-
-/** ⋯ menyusidagi amallar. Qatorni bosish — edit */
-export type ProductAction = 'edit' | 'price' | 'duplicate' | 'delete'
 
 interface ProductTableProps {
   products: StoreProduct[]
@@ -17,10 +15,34 @@ interface ProductTableProps {
   isLoading?: boolean
   emptyText?: string
   onAction: (action: ProductAction, product: StoreProduct) => void
+  /** Chegirma uchun tanlash rejimi: qatorni bosish — tanlash/bekor qilish */
+  selection?: { ids: Set<number>; onToggle: (product: StoreProduct) => void }
 }
 
-export function ProductTable({ products, tree, isLoading, emptyText, onAction }: ProductTableProps) {
+export function ProductTable({ products, tree, isLoading, emptyText, onAction, selection }: ProductTableProps) {
+  const { data: rules } = useDiscountRules()
+
+  const selectColumn: TableColumn<StoreProduct> = {
+    key: 'select',
+    header: '',
+    width: '48px',
+    render: (product) => {
+      const isOn = selection?.ids.has(product.id)
+      return (
+        <span
+          className={cn(
+            'flex size-5 items-center justify-center rounded border',
+            isOn ? 'border-primary bg-primary text-white' : 'border-border-strong',
+          )}
+        >
+          {isOn && <Check className="size-3.5" />}
+        </span>
+      )
+    },
+  }
+
   const columns: TableColumn<StoreProduct>[] = [
+    ...(selection ? [selectColumn] : []),
     {
       key: 'name',
       header: 'Mahsulot',
@@ -39,7 +61,7 @@ export function ProductTable({ products, tree, isLoading, emptyText, onAction }:
       header: 'Kategoriya',
       render: (product) => <span className="text-sm text-content">{categoryPath(product, tree) || '—'}</span>,
     },
-    { key: 'price', header: 'Narx', render: (product) => <ProductPrice product={product} /> },
+    { key: 'price', header: 'Narx', render: (product) => <ProductPrice product={product} rules={rules?.get(product.id)} /> },
     { key: 'status', header: 'Xizmatlar', render: (product) => <AvailabilityBadges product={product} /> },
     {
       key: 'stats',
@@ -65,31 +87,16 @@ export function ProductTable({ products, tree, isLoading, emptyText, onAction }:
       header: '',
       align: 'end',
       width: '56px',
-      render: (product) => (
-        // Qator bosilishi (ochish) menyuga o'tmasin
-        <div onClick={(event) => event.stopPropagation()}>
-          <CusMenu
-            trigger={<CusIconButton icon={Ellipsis} label="Amallar" size="sm" />}
-            items={[
-              { value: 'edit', label: 'Tahrirlash', icon: <Pencil className="size-4" /> },
-              { value: 'price', label: "Narxni o'zgartirish", icon: <Banknote className="size-4" /> },
-              { value: 'duplicate', label: 'Nusxa olish', icon: <Copy className="size-4" /> },
-              { separator: true },
-              { value: 'delete', label: "O'chirish", icon: <Trash2 className="size-4" />, isDanger: true },
-            ]}
-            onSelect={(value) => onAction(value as ProductAction, product)}
-          />
-        </div>
-      ),
+      render: (product) => <ProductActionsMenu product={product} onAction={onAction} />,
     },
   ]
 
   return (
     <CusTable
-      columns={columns}
+      columns={selection ? columns.filter((column) => column.key !== 'actions') : columns}
       data={products}
       rowKey={(product) => product.id}
-      onRowClick={(product) => onAction('edit', product)}
+      onRowClick={(product) => (selection ? selection.onToggle(product) : onAction('view', product))}
       isLoading={isLoading}
       emptyText={emptyText}
     />

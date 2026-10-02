@@ -491,8 +491,8 @@ paths:
                     - 2
                     color: 3
                     size:
-                      gte: 40
-                      lte: 46
+                    - 40
+                    - 42
                     price_sale:
                       gte: '1000.00'
                       lte: '20000.00'
@@ -887,6 +887,7 @@ paths:
                   filters:
                     name: Платья
                     parent: 1
+                    visible: true
                     created_at:
                       eq: '2026-09-21'
                       gt: '2026-01-01'
@@ -1258,7 +1259,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StoreDiscount'
+                $ref: '#/components/schemas/StoreDiscountResponse'
           description: ''
   /api/v1/stores/discounts/{id}/:
     get:
@@ -1284,7 +1285,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StoreDiscount'
+                $ref: '#/components/schemas/StoreDiscountResponse'
           description: ''
     patch:
       operationId: stores_discounts_partial_update
@@ -1320,7 +1321,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StoreDiscount'
+                $ref: '#/components/schemas/StoreDiscountResponse'
           description: ''
     delete:
       operationId: stores_discounts_destroy
@@ -1390,7 +1391,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedStoreDiscount'
+                $ref: '#/components/schemas/PaginatedStoreDiscountResponse'
           description: ''
   /api/v1/stores/icons/:
     post:
@@ -1610,7 +1611,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StoreNews'
+                $ref: '#/components/schemas/StoreNewsResponse'
           description: ''
   /api/v1/stores/news/{id}/:
     get:
@@ -1636,7 +1637,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StoreNews'
+                $ref: '#/components/schemas/StoreNewsResponse'
           description: ''
     patch:
       operationId: stores_news_partial_update
@@ -1672,7 +1673,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StoreNews'
+                $ref: '#/components/schemas/StoreNewsResponse'
           description: ''
     delete:
       operationId: stores_news_destroy
@@ -1739,7 +1740,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedStoreNews'
+                $ref: '#/components/schemas/PaginatedStoreNewsResponse'
           description: ''
   /api/v1/stores/orders/{id}/:
     get:
@@ -2661,8 +2662,8 @@ paths:
                     - 2
                     color: 3
                     size:
-                      gte: 40
-                      lte: 46
+                    - 40
+                    - 42
                     price_sale:
                       gte: '1000.00'
                       lte: '20000.00'
@@ -3684,6 +3685,9 @@ components:
       properties:
         product:
           type: integer
+        size:
+          type: integer
+          nullable: true
         quantity:
           type: integer
           minimum: 1
@@ -3957,13 +3961,13 @@ components:
       - page
       - total
       - totalPages
-    PaginatedStoreDiscount:
+    PaginatedStoreDiscountResponse:
       type: object
       properties:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/StoreDiscount'
+            $ref: '#/components/schemas/StoreDiscountResponse'
         page:
           type: integer
         totalPages:
@@ -3975,13 +3979,13 @@ components:
       - page
       - total
       - totalPages
-    PaginatedStoreNews:
+    PaginatedStoreNewsResponse:
       type: object
       properties:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/StoreNews'
+            $ref: '#/components/schemas/StoreNewsResponse'
         page:
           type: integer
         totalPages:
@@ -4241,6 +4245,8 @@ components:
         parent:
           type: integer
           nullable: true
+        visible:
+          type: boolean
         cover:
           type: string
           format: binary
@@ -4301,6 +4307,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DiscountProductRequest'
+        image:
+          type: string
+          format: binary
+          writeOnly: true
+          nullable: true
     PatchedStoreNewsRequest:
       type: object
       properties:
@@ -4329,6 +4340,11 @@ components:
           type: array
           items:
             type: integer
+        image:
+          type: string
+          format: binary
+          writeOnly: true
+          nullable: true
     PatchedStoreOrderStatusUpdateRequest:
       type: object
       description: |-
@@ -4406,10 +4422,11 @@ components:
           type: integer
           nullable: true
         size:
-          type: integer
-          maximum: 2147483647
-          minimum: -2147483648
-          nullable: true
+          type: array
+          items:
+            type: integer
+            maximum: 2147483647
+            minimum: -2147483648
         price_sale:
           type: string
           format: decimal
@@ -4717,10 +4734,11 @@ components:
           type: integer
           nullable: true
         size:
-          type: integer
-          maximum: 2147483647
-          minimum: -2147483648
-          nullable: true
+          type: array
+          items:
+            type: integer
+            maximum: 2147483647
+            minimum: -2147483648
         price_sale:
           type: string
           format: decimal
@@ -4807,12 +4825,17 @@ components:
         ends_at:
           type: string
           format: date-time
+        image:
+          allOf:
+          - $ref: '#/components/schemas/StoreProductPhoto'
+          readOnly: true
       required:
       - description
       - discount
       - discount_type
       - ends_at
       - id
+      - image
       - starts_at
       - title
       - value
@@ -4986,6 +5009,10 @@ components:
           type: array
           items:
             type: integer
+        image:
+          allOf:
+          - $ref: '#/components/schemas/StoreProductPhoto'
+          readOnly: true
         created_at:
           type: string
           format: date-time
@@ -4998,6 +5025,7 @@ components:
       - created_at
       - ends_at
       - id
+      - image
       - news_type
       - slug
       - starts_at
@@ -5177,6 +5205,8 @@ components:
         parent:
           type: integer
           nullable: true
+        visible:
+          type: boolean
         cover:
           type: string
           format: uri
@@ -5217,6 +5247,8 @@ components:
         parent:
           type: integer
           nullable: true
+        visible:
+          type: boolean
         cover:
           type: string
           format: binary
@@ -5324,44 +5356,6 @@ components:
           type: boolean
       required:
       - name
-    StoreDiscount:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        title:
-          type: string
-          maxLength: 255
-        description:
-          type: string
-        starts_at:
-          type: string
-          format: date-time
-          nullable: true
-        ends_at:
-          type: string
-          format: date-time
-          nullable: true
-        status:
-          $ref: '#/components/schemas/ContentStatusEnum'
-        products:
-          type: array
-          items:
-            $ref: '#/components/schemas/DiscountProduct'
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - created_at
-      - id
-      - title
-      - updated_at
     StoreDiscountRequest:
       type: object
       properties:
@@ -5385,10 +5379,21 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DiscountProductRequest'
+        image:
+          type: string
+          format: binary
+          writeOnly: true
+          nullable: true
       required:
       - title
-    StoreNews:
+    StoreDiscountResponse:
       type: object
+      description: |-
+        Doc-only (never actually instantiated to serialize a response - see
+        products/viewsets.py) - mirrors StoreProductResponseSerializer's reason
+        for existing: `image` is write_only (a plain photo id on input) with its
+        real nested-with-renditions shape injected by to_representation(), which
+        drf-spectacular can't see statically.
       properties:
         id:
           type: integer
@@ -5396,26 +5401,26 @@ components:
         title:
           type: string
           maxLength: 255
-        news_type:
-          $ref: '#/components/schemas/NewsTypeEnum'
-        slug:
-          type: string
-          maxLength: 255
-          pattern: ^[-a-zA-Z0-9_]+$
         description:
           type: string
         starts_at:
           type: string
           format: date-time
+          nullable: true
         ends_at:
           type: string
           format: date-time
+          nullable: true
         status:
           $ref: '#/components/schemas/ContentStatusEnum'
         products:
           type: array
           items:
-            type: integer
+            $ref: '#/components/schemas/DiscountProduct'
+        image:
+          allOf:
+          - $ref: '#/components/schemas/StoreProductPhoto'
+          readOnly: true
         created_at:
           type: string
           format: date-time
@@ -5426,11 +5431,8 @@ components:
           readOnly: true
       required:
       - created_at
-      - ends_at
       - id
-      - news_type
-      - slug
-      - starts_at
+      - image
       - title
       - updated_at
     StoreNewsRequest:
@@ -5461,12 +5463,74 @@ components:
           type: array
           items:
             type: integer
+        image:
+          type: string
+          format: binary
+          writeOnly: true
+          nullable: true
       required:
       - ends_at
       - news_type
       - slug
       - starts_at
       - title
+    StoreNewsResponse:
+      type: object
+      description: |-
+        Doc-only (never actually instantiated to serialize a response - see
+        news/viewsets.py) - mirrors products' StoreProductResponseSerializer:
+        `image` is write_only (a plain photo id on input) with its real
+        nested-with-renditions shape injected by to_representation(), which
+        drf-spectacular can't see statically.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        news_type:
+          $ref: '#/components/schemas/NewsTypeEnum'
+        slug:
+          type: string
+          maxLength: 255
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/ContentStatusEnum'
+        products:
+          type: array
+          items:
+            type: integer
+        image:
+          allOf:
+          - $ref: '#/components/schemas/StoreProductPhoto'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - ends_at
+      - id
+      - image
+      - news_type
+      - slug
+      - starts_at
+      - title
+      - updated_at
     StoreOrder:
       type: object
       description: Read shape - identical for both the store-admin side and the buyer
@@ -5523,6 +5587,11 @@ components:
           type: integer
           nullable: true
         product_snapshot: {}
+        size:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
         quantity:
           type: integer
           maximum: 2147483647
@@ -5706,10 +5775,11 @@ components:
           type: integer
           nullable: true
         size:
-          type: integer
-          maximum: 2147483647
-          minimum: -2147483648
-          nullable: true
+          type: array
+          items:
+            type: integer
+            maximum: 2147483647
+            minimum: -2147483648
         price_sale:
           type: string
           format: decimal
@@ -5786,10 +5856,11 @@ components:
           type: integer
           nullable: true
         size:
-          type: integer
-          maximum: 2147483647
-          minimum: -2147483648
-          nullable: true
+          type: array
+          items:
+            type: integer
+            maximum: 2147483647
+            minimum: -2147483648
         price_sale:
           type: string
           format: decimal

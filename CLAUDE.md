@@ -19,8 +19,8 @@ features/<name>/  Feature<Name>.tsx (page body) + components/ + modals/ (every C
   catalog/        no page (managed in /store tabs). colors, tags, materials, material groups: hooks (useCatalog.ts),
                   modals/CatalogItemDialog (create/edit, quick-create in product form)
   categories/     useCategories() → {roots, childrenOf, byId}; master-detail page
-  products/       table list (FeatureProducts, URL filters + ProductFilterDrawer) + modals/: ProductFormModal (2 steps:
-                  1 required fields, 2 photos/attributes; persistent, asks before closing dirty), ProductPriceModal, duplicate
+  products/       table list (FeatureProducts, URL filters + ProductFilterDrawer) + modals/: ProductFormModal (3 steps:
+                  1 name+classification, 2 prices+attributes, 3 photos: upload all to pool, drag into variants; persistent, asks before closing dirty), ProductPriceModal, duplicate
                   (= form modal with duplicateValues, no photos). Sections in components/form/*, mapping in utils/productForm.ts
   store/          /store?tab=… one row of tabs; each tab = components/<X>Tab (CrudSection: table + ⋯ menu + delete confirm)
                   + modals/<X>Modal (CusFormDialog + useEntityForm). Colors/tags/materials tabs reuse catalog hooks + CatalogItemDialog
@@ -70,7 +70,7 @@ Adding a page = 1) `features/x/FeatureX.tsx`, 2) `pages/admin/X.tsx`, 3) entry i
 
 ## Domain notes
 - Category = StoreCategory; subcategory = category with `parent`.
-- Product photos: upload first (POST /stores/product-photos/ FormData `image`) → id; `processing_status` pending→ready (form polls every 3s). Product saves `variants: [{photos: ids}]`. Variant = photo set only (no color/size) — open question to backend.
+- Product photos: upload first (POST /stores/product-photos/ FormData `image`) → id; `processing_status` pending→ready (form polls every 3s). Product saves `variants: [{photos: ids}]`. Variant = photo set only (no color/size) — open question to backend. Form step 3: utils/photoState.ts (pool + variants, move/patch/remove); unassigned pool photos block save.
 - Product form mapping: `features/products/utils/productForm.ts` (toFormValues / validate / toRequest / serverFieldErrors, step fields, duplicateValues, price-only helpers).
 
 ## Styling rules
@@ -87,5 +87,5 @@ Adding a page = 1) `features/x/FeatureX.tsx`, 2) `pages/admin/X.tsx`, 3) entry i
 - Shell: no python; use node -e or Edit/Write. Avoid backticks inside bash heredocs/strings.
 
 ## Status
-Done: auth, layout, UI kit, dashboard (mock), settings accent, categories, products (table + URL filters, 2-step create/edit modal, price modal, duplicate), store (/store: info, addresses, contacts, services, social links, colors, tags, materials, material groups). Placeholders: discounts, news.
+Done: auth, layout, UI kit, dashboard (mock), settings accent, categories, products (table + URL filters, 3-step create/edit modal, price modal, duplicate), store (/store: info, addresses, contacts, services, social links, colors, tags, materials, material groups). news + discounts (CrudSection jadval, NewsModal/DiscountModal; holat muddatdan hisoblanadi: utils/schedule.ts — boshlanmagan=draft, muddat ichida=active, tugagan=archived; faol chegirma mahsulot narxida eski narx chizilib ko'rinadi: discounts/utils/discountPrice.ts).
 Open: Icon.name meaning (lucide name?) unknown — services show it as text.

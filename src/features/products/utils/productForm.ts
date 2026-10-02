@@ -7,9 +7,14 @@ import { SLUG_PATTERN, slugify } from '@/utils/slugify'
 /** Variant ichidagi bitta rasm: yuklanayotgan yoki tayyor */
 export interface PhotoDraft {
   key: string
+  /** Serverdagi rasm. Yangi rasmda saqlash paytida yuklangach to'ladi */
   photo?: StoreProductPhoto
-  /** Yuklanayotganda lokal ko'rinish (blob:) */
+  /** Hali yuklanmagan yangi rasm fayli */
+  file?: File
+  /** Lokal ko'rinish (blob:) */
   preview?: string
+  /** Saqlash paytida serverga yuklanmoqda */
+  uploading?: boolean
   error?: string
 }
 
@@ -32,7 +37,8 @@ export interface ProductFormValues {
   brand: string
   manufacture: string
   color: string
-  size: string
+  /** Tanlangan o'lchamlar */
+  size: number[]
   material_ids: number[]
   is_sellable: boolean
   is_rentable: boolean
@@ -41,14 +47,31 @@ export interface ProductFormValues {
   price_tailoring: string
   blur_image_in_site: boolean
   variants: VariantDraft[]
+  /** Yuklangan, lekin hali variantga qo'yilmagan rasmlar — faqat formada, API ga ketmaydi */
+  pool: PhotoDraft[]
 }
 
 export type ProductFormErrors = Partial<Record<keyof ProductFormValues, string>>
 
 export const uid = () => Math.random().toString(36).slice(2)
 
+/** Forma tugmalaridagi o'lchamlar */
+export const SIZE_OPTIONS = [39, 40, 41, 42, 43, 44, 45]
+
 export function emptyVariant(): VariantDraft {
   return { key: uid(), photos: [] }
+}
+
+/** Doim tayyor turadigan variantlar soni (bo'sh qolganlari saqlanmaydi) */
+export const VARIANT_COUNT = 3
+
+/** Bitta variantga qo'yiladigan rasmlarning eng ko'pi */
+export const MAX_VARIANT_PHOTOS = 5
+
+/** Variantlar kamida VARIANT_COUNT ta bo'lishi uchun bo'sh variantlar qo'shiladi */
+export function padVariants(variants: VariantDraft[]): VariantDraft[] {
+  const missing = Math.max(0, VARIANT_COUNT - variants.length)
+  return [...variants, ...Array.from({ length: missing }, emptyVariant)]
 }
 
 /** "1450000.00" -> "1450000" (inputda ortiqcha nollar ko'rinmasin) */
@@ -69,7 +92,7 @@ export function toFormValues(product?: StoreProduct): ProductFormValues {
     brand: product?.brand ?? '',
     manufacture: product?.manufacture ?? '',
     color: product?.color ? String(product.color) : '',
-    size: product?.size != null ? String(product.size) : '',
+    size: product?.size ?? [],
     material_ids: product?.material_ids ?? [],
     // Yangi mahsulot default sotiladi
     is_sellable: product?.is_sellable ?? true,
@@ -78,12 +101,13 @@ export function toFormValues(product?: StoreProduct): ProductFormValues {
     price_rental: priceToInput(product?.price_rental),
     price_tailoring: priceToInput(product?.price_tailoring),
     blur_image_in_site: product?.blur_image_in_site ?? false,
-    variants: product?.variants.length
-      ? product.variants.map((variant) => ({
-          key: uid(),
-          photos: variant.photos.map((photo) => ({ key: uid(), photo })),
-        }))
-      : [emptyVariant()],
+    variants: padVariants(
+      (product?.variants ?? []).map((variant) => ({
+        key: uid(),
+        photos: variant.photos.map((photo) => ({ key: uid(), photo })),
+      })),
+    ),
+    pool: [],
   }
 }
 
@@ -104,13 +128,13 @@ export function validate(values: ProductFormValues): ProductFormErrors {
   if (!values.slug.trim()) errors.slug = 'Slug kerak'
   else if (!SLUG_PATTERN.test(values.slug)) errors.slug = "Faqat lotin harflari, raqam, '-' va '_'"
   if (!values.category) errors.category = 'Kategoriyani tanlang'
-  if (values.size && !/^\d+$/.test(values.size)) errors.size = 'Butun son kiriting'
 
   if (values.is_sellable && !normalizePrice(values.price_sale)) errors.price_sale = 'Sotuv narxini kiriting'
   if (values.is_rentable && !normalizePrice(values.price_rental)) errors.price_rental = 'Ijara narxini kiriting'
   for (const key of ['price_sale', 'price_rental', 'price_tailoring'] as const) {
     if (!errors[key] && !isValidPrice(values[key])) errors[key] = "Noto'g'ri narx"
   }
+  // Joylanmagan rasm saqlanmaydi — jimgina yo'qolmasin
   return errors
 }
 
@@ -125,7 +149,7 @@ export function toRequest(values: ProductFormValues): StoreProductRequest {
     brand: values.brand.trim(),
     manufacture: values.manufacture.trim(),
     color: values.color ? Number(values.color) : null,
-    size: values.size ? Number(values.size) : null,
+    size: values.size,
     material_ids: values.material_ids,
     is_sellable: values.is_sellable,
     is_rentable: values.is_rentable,
@@ -151,7 +175,7 @@ export function serverFieldErrors(error: unknown): ProductFormErrors {
  */
 export function duplicateValues(source: StoreProduct): ProductFormValues {
   const name = `${source.name} (nusxa)`
-  return { ...toFormValues(source), name, slug: slugify(name), variants: [emptyVariant()] }
+  return { ...toFormValues(source), name, slug: slugify(name), variants: padVariants([]) }
 }
 
 function pick<T extends object, K extends keyof T>(source: T, keys: readonly K[]) {
@@ -160,27 +184,30 @@ function pick<T extends object, K extends keyof T>(source: T, keys: readonly K[]
 
 // ─── Modal qadamlari ─────────────────────────────────────────────────────────
 
-/** 1 — barcha majburiy maydonlar, 2 — rasmlar va ixtiyoriy xususiyatlar */
+/** 1 — nom va tasnif, 2 — narx va xususiyatlar, 3 — rasmlar (yuklash, variantlarga sudrash) */
 export const PRODUCT_STEPS: StepItem[] = [
-  { title: "Asosiy ma'lumot", description: 'Nom, kategoriya, narx' },
-  { title: 'Rasm va xususiyatlar', description: 'Rasmlar, rang, material' },
+  { title: "Asosiy ma'lumot", description: 'Nom, kategoriya, teglar' },
+  { title: 'Narx va xususiyatlar', description: 'Narx, rang, material' },
+  { title: 'Rasmlar', description: 'Yuklash va variantlarga joylash' },
 ]
 
+/** Har bir qadamdagi maydonlar — xato qaysi qadamda ekanini aniqlash uchun */
 const STEP_FIELDS: (keyof ProductFormValues)[][] = [
+  ['name', 'slug', 'description', 'category', 'subcategory', 'tags'],
   [
-    'name',
-    'slug',
-    'description',
-    'category',
-    'subcategory',
-    'tags',
     'is_sellable',
     'is_rentable',
     'price_sale',
     'price_rental',
     'price_tailoring',
+    'brand',
+    'manufacture',
+    'color',
+    'size',
+    'material_ids',
+    'blur_image_in_site',
   ],
-  ['variants', 'brand', 'manufacture', 'color', 'size', 'material_ids', 'blur_image_in_site'],
+  ['variants', 'pool'],
 ]
 
 /** Faqat shu qadamdagi xatolar ("Keyingi" bosilganda) */

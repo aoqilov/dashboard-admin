@@ -11,7 +11,10 @@ export interface CusDialogProps {
   children?: ReactNode
   /** Pastki tugmalar */
   footer?: ReactNode
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  /** cover — ekranni chetlaridan kichik joy qoldirib egallaydi (katta formalar, kam scroll) */
+  /** Kenglikni qo'lda berish (masalan '1200px'); size dan ustun */
+  maxWidth?: string
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'cover' | 'full'
   placement?: 'center' | 'top'
   /** Tashqariga bosganda yopilmasin */
   isPersistent?: boolean
@@ -27,11 +30,14 @@ export function CusDialog({
   description,
   children,
   footer,
+  maxWidth,
   size = 'md',
   placement = 'center',
   isPersistent,
   scrollBehavior = 'outside',
 }: CusDialogProps) {
+  const isCover = size === 'cover'
+
   return (
     <Dialog.Root
       open={open}
@@ -45,8 +51,10 @@ export function CusDialog({
       {trigger && <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>}
       <Portal>
         <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content borderRadius="2xl">
+        {/* cover: telefonda chet kichik; juda keng ekranda 1680px dan oshmaydi.
+            maxH — "inside" scroll balandlikni 7.5rem ga qisqartirmasin */}
+        <Dialog.Positioner p={isCover ? { base: '3', md: '6', xl: '10' } : undefined}>
+          <Dialog.Content borderRadius="2xl" maxW={maxWidth ?? (isCover ? '1680px' : undefined)} maxH={isCover ? '100%' : undefined}>
             {(title || description) && (
               <Dialog.Header flexDirection="column" alignItems="flex-start" gap="1">
                 {title && <Dialog.Title>{title}</Dialog.Title>}
