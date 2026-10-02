@@ -5,12 +5,15 @@ import { cn } from '@/utils/cn'
 interface SidebarGroupProps {
   title: string
   compact: boolean
+  /** Oldingi bo'limdan chiziq bilan ajratiladi */
+  divider?: boolean
   children: ReactNode
 }
 
-export function SidebarGroup({ title, compact, children }: SidebarGroupProps) {
+export function SidebarGroup({ title, compact, divider, children }: SidebarGroupProps) {
   return (
-    <div className="mt-6 first:mt-0">
+    <div className="mt-4 first:mt-0">
+      {divider && <div className="mx-6 mb-4 border-t border-border" />}
       <p
         className={cn(
           'mb-2 flex px-6 text-xs leading-5 text-muted',

@@ -1,10 +1,21 @@
 import { useState } from 'react'
-import { ArrowRight, ChevronRight, Ellipsis, FolderTree, Layers, Pencil, Plus, Trash2 } from 'lucide-react'
+import {
+  Columns2,
+  Ellipsis,
+  FolderPlus,
+  LayoutGrid,
+  Layers,
+  ListTree,
+  Pencil,
+  Plus,
+  Table2,
+  Trash2,
+} from 'lucide-react'
 import { getErrorMessage } from '@/api/api-config/apiError'
 import type { StoreCategory } from '@/api/routes/stores-categories/storeCategories.types'
 import { CusCard } from '@/components/shared/card/CusCard'
+import { LayoutSwitch, type LayoutOption } from '@/components/shared/layout-switch/LayoutSwitch'
 import { PageHeader } from '@/components/shared/page-header/PageHeader'
-import { CusBadge } from '@/components/ui/badge/CusBadge'
 import { CusButton } from '@/components/ui/buttons/CusButton'
 import { CusIconButton } from '@/components/ui/buttons/CusIconButton'
 import { CusDialogDelete } from '@/components/ui/dialog/CusDialogDelete'
@@ -12,37 +23,49 @@ import { CusEmptyState } from '@/components/ui/empty-state/CusEmptyState'
 import { CusMenu } from '@/components/ui/menu/CusMenu'
 import { CusSkeleton } from '@/components/ui/skeleton/CusSkeleton'
 import { toaster } from '@/components/ui/toaster/toaster'
-import { CusTitle } from '@/components/ui/typography/CusTypography'
-import { cn } from '@/utils/cn'
+import { VisibleSwitch } from '@/features/store/components/VisibleSwitch'
 import { navigate } from '@/utils/navigate'
 import { useCategories, useCategoryMutations } from './api-hooks/useCategories'
+import { CategoryGridView } from './components/views/CategoryGridView'
+import { CategorySplitView } from './components/views/CategorySplitView'
+import { CategoryTableView } from './components/views/CategoryTableView'
+import { CategoryTreeView } from './components/views/CategoryTreeView'
 import { CategoryDialog } from './modals/CategoryDialog'
-import { CategoryThumb } from './components/CategoryThumb'
+import { useCategoryLayout, type CategoryLayout } from './utils/categoryLayout'
 
 type DialogState =
   | { mode: 'create'; parent: StoreCategory | null }
   | { mode: 'edit'; category: StoreCategory }
   | null
 
+const LAYOUTS: LayoutOption<CategoryLayout>[] = [
+  { value: 'table', label: 'Jadval', icon: Table2 },
+  { value: 'split', label: 'Ikki panel', icon: Columns2 },
+  { value: 'grid', label: "Kartalar to'ri", icon: LayoutGrid },
+  { value: 'tree', label: 'Daraxt', icon: ListTree },
+]
+
 /**
- * Kategoriyalar: chapda asosiy kategoriyalar, o'ngda tanlanganning subkategoriyalari.
- * Subkategoriya — parent'i bor oddiy kategoriya.
+ * Kategoriyalar: 4 xil ko'rinish (jadval, ikki panel, kartalar to'ri, daraxt), tanlov eslab qolinadi.
+ * Subkategoriya — parent'i bor oddiy kategoriya. Amallar va dialoglar hamma ko'rinish uchun umumiy.
  */
 export default function FeatureCategories() {
   const { data: tree, isLoading } = useCategories()
-  const { remove } = useCategoryMutations()
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const { update, remove } = useCategoryMutations()
+  const [layout, setLayout] = useCategoryLayout()
   const [dialog, setDialog] = useState<DialogState>(null)
   const [toDelete, setToDelete] = useState<StoreCategory | null>(null)
 
   const roots = tree?.roots ?? []
-  const selected = roots.find((root) => root.id === selectedId) ?? roots[0]
-  const children = selected ? (tree?.childrenOf.get(selected.id) ?? []) : []
   const deleteChildren = toDelete ? (tree?.childrenOf.get(toDelete.id)?.length ?? 0) : 0
 
-  /** /products sahifasi shu subkategoriya bo'yicha filtrlangan holda ochiladi */
-  const openProducts = (sub: StoreCategory) => {
-    const query = new URLSearchParams({ category: String(sub.parent ?? ''), subcategory: String(sub.id) })
+  /** /products sahifasi shu kategoriya yoki subkategoriya bo'yicha filtrlangan holda ochiladi */
+  const openProducts = (category: StoreCategory) => {
+    const query = new URLSearchParams(
+      category.parent != null
+        ? { category: String(category.parent), subcategory: String(category.id) }
+        : { category: String(category.id) },
+    )
     navigate(`/products?${query}`)
   }
 
@@ -57,15 +80,41 @@ export default function FeatureCategories() {
     }
   }
 
+  /** "Saytda" tugmasi va ⋯ menyusi; asosiy kategoriyada subkategoriya qo'shish ham bor */
   const actions = (category: StoreCategory) => (
-    <CusMenu
-      trigger={<CusIconButton icon={Ellipsis} label="Amallar" variant="ghost" size="sm" />}
-      items={[
-        { value: 'edit', label: 'Tahrirlash', icon: <Pencil className="size-4" /> },
-        { value: 'delete', label: "O'chirish", icon: <Trash2 className="size-4" />, isDanger: true },
-      ]}
-      onSelect={(value) => (value === 'edit' ? setDialog({ mode: 'edit', category }) : setToDelete(category))}
-    />
+    <div className="flex items-center gap-2">
+      <span className="hidden text-xs text-muted sm:block">Saytda</span>
+      <VisibleSwitch id={category.id} visible={category.visible} update={update} />
+      <CusMenu
+        trigger={<CusIconButton icon={Ellipsis} label="Amallar" variant="ghost" size="sm" />}
+        items={[
+          { value: 'edit', label: 'Tahrirlash', icon: <Pencil className="size-4" /> },
+          ...(category.parent == null
+            ? [{ value: 'add-sub', label: "Subkategoriya qo'shish", icon: <FolderPlus className="size-4" /> }]
+            : []),
+          { separator: true as const },
+          { value: 'delete', label: "O'chirish", icon: <Trash2 className="size-4" />, isDanger: true },
+        ]}
+        onSelect={(value) => {
+          if (value === 'edit') setDialog({ mode: 'edit', category })
+          else if (value === 'add-sub') setDialog({ mode: 'create', parent: category })
+          else setToDelete(category)
+        }}
+      />
+    </div>
+  )
+
+  const viewProps = {
+    tree: tree!,
+    actions,
+    onAdd: (parent: StoreCategory | null) => setDialog({ mode: 'create', parent }),
+    onOpenProducts: openProducts,
+  }
+
+  const addButton = (
+    <CusButton leftIcon={<Plus />} onClick={() => setDialog({ mode: 'create', parent: null })}>
+      Kategoriya qo'shish
+    </CusButton>
   )
 
   return (
@@ -74,9 +123,10 @@ export default function FeatureCategories() {
         title="Kategoriyalar"
         description="Mahsulotlar kategoriya va subkategoriyalarga bo'linadi"
         actions={
-          <CusButton leftIcon={<Plus />} onClick={() => setDialog({ mode: 'create', parent: null })}>
-            Kategoriya qo'shish
-          </CusButton>
+          <>
+            <LayoutSwitch options={LAYOUTS} value={layout} onChange={setLayout} />
+            {addButton}
+          </>
         }
       />
 
@@ -91,112 +141,20 @@ export default function FeatureCategories() {
             icon={<Layers />}
             title="Hali kategoriya yo'q"
             description="Mahsulot qo'shishdan oldin kamida bitta kategoriya yarating"
-            action={
-              <CusButton leftIcon={<Plus />} onClick={() => setDialog({ mode: 'create', parent: null })}>
-                Kategoriya qo'shish
-              </CusButton>
-            }
+            action={addButton}
           />
         </CusCard>
       ) : (
-        <div className="grid items-start gap-6 lg:grid-cols-[320px_1fr]">
-          {/* Asosiy kategoriyalar */}
-          <CusCard className="p-2 sm:p-2">
-            <ul className="flex flex-col">
-              {roots.map((root) => {
-                const count = tree?.childrenOf.get(root.id)?.length ?? 0
-                const active = root.id === selected?.id
-                return (
-                  <li key={root.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedId(root.id)}
-                      className={cn(
-                        'flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left transition-colors',
-                        active ? 'bg-primary/8 dark:bg-primary/15' : 'hover:bg-hover',
-                      )}
-                    >
-                      <CategoryThumb category={root} />
-                      <span className="min-w-0 flex-1">
-                        <span className={cn('block truncate text-sm font-medium', active ? 'text-primary dark:text-primary-light' : 'text-heading')}>
-                          {root.name}
-                        </span>
-                        <span className="text-xs text-muted">{count} ta subkategoriya</span>
-                      </span>
-                      {root.visible === false && <CusBadge color="dark">Yashirin</CusBadge>}
-                      <ChevronRight className={cn('size-4 shrink-0', active ? 'text-primary' : 'text-subtle')} />
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          </CusCard>
-
-          {/* Tanlangan kategoriya va uning subkategoriyalari */}
-          {selected && (
-            <CusCard className="flex flex-col gap-5">
-              <div className="flex items-center gap-4">
-                <CategoryThumb category={selected} className="size-16" />
-                <div className="min-w-0 flex-1">
-                  <CusTitle size="lg" className="truncate">
-                    {selected.name}
-                  </CusTitle>
-                  <p className="flex items-center gap-2 text-sm text-muted">
-                    Asosiy kategoriya
-                    {selected.visible === false && <CusBadge color="dark">Yashirin</CusBadge>}
-                  </p>
-                </div>
-                {actions(selected)}
-              </div>
-
-              <div className="h-px bg-border" />
-
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-heading">Subkategoriyalar</p>
-                <CusButton
-                  size="sm"
-                  variant="outline"
-                  leftIcon={<Plus />}
-                  onClick={() => setDialog({ mode: 'create', parent: selected })}
-                >
-                  Subkategoriya
-                </CusButton>
-              </div>
-
-              {children.length === 0 ? (
-                <CusEmptyState
-                  size="sm"
-                  icon={<FolderTree />}
-                  title="Subkategoriya yo'q"
-                  description="Masalan: Ko'ylaklar → Kechki, To'y, Kundalik"
-                />
-              ) : (
-                <ul className="flex flex-col divide-y divide-border">
-                  {children.map((child) => (
-                    <li key={child.id} className="flex items-center gap-1 py-1">
-                      {/* Bosilganda — shu subkategoriya mahsulotlari (filtr URL'da) */}
-                      <button
-                        type="button"
-                        onClick={() => openProducts(child)}
-                        className="group flex min-w-0 flex-1 items-center gap-3 rounded-control px-2 py-1.5 text-left transition-colors hover:bg-hover"
-                      >
-                        <CategoryThumb category={child} className="size-9" />
-                        <span className="min-w-0 flex-1 truncate text-sm text-heading group-hover:text-primary dark:group-hover:text-primary-light">
-                          {child.name}
-                        </span>
-                        {child.visible === false && <CusBadge color="dark">Yashirin</CusBadge>}
-                        <span className="flex shrink-0 items-center gap-1 text-xs text-muted opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                          Mahsulotlar <ArrowRight className="size-3.5" />
-                        </span>
-                      </button>
-                      {actions(child)}
-                    </li>
-                  ))}
-                </ul>
-              )}
+        <>
+          {layout === 'table' && (
+            <CusCard className="p-0 sm:p-0">
+              <CategoryTableView {...viewProps} />
             </CusCard>
           )}
-        </div>
+          {layout === 'split' && <CategorySplitView {...viewProps} />}
+          {layout === 'grid' && <CategoryGridView {...viewProps} />}
+          {layout === 'tree' && <CategoryTreeView {...viewProps} />}
+        </>
       )}
 
       {dialog && (
