@@ -4,10 +4,12 @@ import type { StoreDiscount } from '@/api/routes/stores-discounts/storeDiscounts
 import { CusCard } from '@/components/shared/card/CusCard'
 import { PageHeader } from '@/components/shared/page-header/PageHeader'
 import { ScheduleStatusBadge } from '@/components/shared/status/ScheduleStatusBadge'
+import { LayoutSwitch } from '@/components/shared/layout-switch/LayoutSwitch'
 import { CusSegment } from '@/components/ui/segment/CusSegment'
 import type { TableColumn } from '@/components/ui/table/CusTable'
 import { ProductImage } from '@/features/products/components/shared/ProductBits'
 import { CrudSection } from '@/features/store/components/CrudSection'
+import { CONTENT_LAYOUT_OPTIONS, useContentLayout } from '@/features/store/utils/contentLayout'
 import { photoUrl } from '@/utils/media'
 import { formatPeriod, scheduleStatus, sortBySchedule } from '@/utils/schedule'
 import { useDiscountList, useDiscountMutations } from './api-hooks/useDiscounts'
@@ -63,12 +65,16 @@ export default function FeatureDiscounts() {
   const { data = [], isLoading } = useDiscountList()
   const { remove } = useDiscountMutations()
   const [filter, setFilter] = useState('all')
+  const [layout, setLayout] = useContentLayout('discounts-layout')
   const { draft, picking } = useDiscountDraft()
 
   // Mahsulot tanlash rejimidan qaytilganda (yoki sidebar orqali kelinganda) rejim o'chadi, forma qayta ochiladi
   useEffect(() => finishPicking(), [])
 
-  const rows = useMemo<Row[]>(() => sortBySchedule(data.map((item) => ({ ...item, phase: scheduleStatus(item) }))), [data])
+  const rows = useMemo<Row[]>(
+    () => sortBySchedule(data.map((item) => ({ ...item, phase: scheduleStatus(item) }))),
+    [data],
+  )
   const count = (phase: ContentStatus) => rows.filter((row) => row.phase === phase).length
   const visible = filter === 'all' ? rows : rows.filter((row) => row.phase === filter)
 
@@ -97,6 +103,20 @@ export default function FeatureDiscounts() {
           isLoading={isLoading}
           getName={(row) => row.title}
           remove={remove}
+          layout={layout}
+          toolbar={<LayoutSwitch options={CONTENT_LAYOUT_OPTIONS} value={layout} onChange={setLayout} />}
+          renderCard={(row) => ({
+            image: photoUrl(row.image ?? undefined, 'medium'),
+            title: row.title,
+            description: row.description,
+            badges: <ScheduleStatusBadge status={row.phase} />,
+            meta: (
+              <>
+                <span>{formatPeriod(row.starts_at, row.ends_at)}</span>
+                <span>{productsSummary(row)}</span>
+              </>
+            ),
+          })}
           deleteDescription="Chegirma o'chiriladi, mahsulotlar eski narxga qaytadi. Bu amalni ortga qaytarib bo'lmaydi."
           renderModal={(props) => <DiscountModal {...props} />}
         />

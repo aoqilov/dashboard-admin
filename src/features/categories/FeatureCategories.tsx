@@ -25,7 +25,7 @@ import { CusSkeleton } from '@/components/ui/skeleton/CusSkeleton'
 import { toaster } from '@/components/ui/toaster/toaster'
 import { VisibleSwitch } from '@/features/store/components/VisibleSwitch'
 import { navigate } from '@/utils/navigate'
-import { useCategories, useCategoryMutations } from './api-hooks/useCategories'
+import { useCategories, useCategoryMutations, useCategoryProductCounts } from './api-hooks/useCategories'
 import { CategoryGridView } from './components/views/CategoryGridView'
 import { CategorySplitView } from './components/views/CategorySplitView'
 import { CategoryTableView } from './components/views/CategoryTableView'
@@ -33,10 +33,7 @@ import { CategoryTreeView } from './components/views/CategoryTreeView'
 import { CategoryDialog } from './modals/CategoryDialog'
 import { useCategoryLayout, type CategoryLayout } from './utils/categoryLayout'
 
-type DialogState =
-  | { mode: 'create'; parent: StoreCategory | null }
-  | { mode: 'edit'; category: StoreCategory }
-  | null
+type DialogState = { mode: 'create'; parent: StoreCategory | null } | { mode: 'edit'; category: StoreCategory } | null
 
 const LAYOUTS: LayoutOption<CategoryLayout>[] = [
   { value: 'table', label: 'Jadval', icon: Table2 },
@@ -57,6 +54,10 @@ export default function FeatureCategories() {
   const [toDelete, setToDelete] = useState<StoreCategory | null>(null)
 
   const roots = tree?.roots ?? []
+  const productCounts = useCategoryProductCounts(
+    [...(tree?.byId.keys() ?? [])],
+    new Map([...(tree?.byId ?? [])].map(([id, c]) => [id, c.parent])),
+  )
   const deleteChildren = toDelete ? (tree?.childrenOf.get(toDelete.id)?.length ?? 0) : 0
 
   /** /products sahifasi shu kategoriya yoki subkategoriya bo'yicha filtrlangan holda ochiladi */
@@ -106,6 +107,7 @@ export default function FeatureCategories() {
 
   const viewProps = {
     tree: tree!,
+    productCounts,
     actions,
     onAdd: (parent: StoreCategory | null) => setDialog({ mode: 'create', parent }),
     onOpenProducts: openProducts,

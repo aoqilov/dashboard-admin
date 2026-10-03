@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, type ComponentProps, type ReactNode } from 'react'
 import { Ellipsis, Pencil, Plus, Trash2 } from 'lucide-react'
 import { getErrorMessage } from '@/api/api-config/apiError'
 import { CusButton } from '@/components/ui/buttons/CusButton'
@@ -6,7 +6,11 @@ import { CusIconButton } from '@/components/ui/buttons/CusIconButton'
 import { CusDialogDelete } from '@/components/ui/dialog/CusDialogDelete'
 import { CusMenu } from '@/components/ui/menu/CusMenu'
 import { CusTable, type TableColumn } from '@/components/ui/table/CusTable'
+import { CusEmptyState } from '@/components/ui/empty-state/CusEmptyState'
+import { CusSkeleton } from '@/components/ui/skeleton/CusSkeleton'
 import { toaster } from '@/components/ui/toaster/toaster'
+import type { ContentLayout } from '../utils/contentLayout'
+import { ContentCard } from './ContentCard'
 
 /** CrudSection ochadigan modal props'lari. item = null — yangi element */
 export interface CrudModalProps<T> {
@@ -27,6 +31,12 @@ interface CrudSectionProps<T extends { id: number }> {
   getName: (row: T) => string
   remove: { mutateAsync: (id: number) => Promise<unknown>; isPending: boolean }
   deleteDescription?: string
+  /** Qo'shish tugmasi oldidagi element (ko'rinish almashtirgich) */
+  toolbar?: ReactNode
+  /** Jadvaldan boshqa ko'rinish; renderCard bo'lsa kartalar chiziladi */
+  layout?: ContentLayout
+  /** Karta mazmuni — menu (⋯) tayyor beriladi */
+  renderCard?: (row: T) => Omit<ComponentProps<typeof ContentCard>, 'layout' | 'menu' | 'onClick'>
   /** Yaratish/tahrirlash modali — modals/ papkasidan */
   renderModal: (props: CrudModalProps<T>) => ReactNode
 }
@@ -41,6 +51,9 @@ export function CrudSection<T extends { id: number }>({
   getName,
   remove,
   deleteDescription,
+  toolbar,
+  layout = 'table',
+  renderCard,
   renderModal,
 }: CrudSectionProps<T>) {
   const [modal, setModal] = useState<{ item: T | null } | null>(null)
@@ -57,42 +70,68 @@ export function CrudSection<T extends { id: number }>({
     }
   }
 
+  const rowMenu = (row: T) => (
+    <CusMenu
+      trigger={<CusIconButton icon={Ellipsis} label="Amallar" size="sm" />}
+      items={[
+        { value: 'edit', label: 'Tahrirlash', icon: <Pencil className="size-4" /> },
+        { value: 'delete', label: "O'chirish", icon: <Trash2 className="size-4" />, isDanger: true },
+      ]}
+      onSelect={(value) => (value === 'edit' ? setModal({ item: row }) : setToDelete(row))}
+    />
+  )
+
   const actionsColumn: TableColumn<T> = {
     key: 'actions',
     header: '',
     align: 'end',
     width: '56px',
-    render: (row) => (
-      <div onClick={(event) => event.stopPropagation()}>
-        <CusMenu
-          trigger={<CusIconButton icon={Ellipsis} label="Amallar" size="sm" />}
-          items={[
-            { value: 'edit', label: 'Tahrirlash', icon: <Pencil className="size-4" /> },
-            { value: 'delete', label: "O'chirish", icon: <Trash2 className="size-4" />, isDanger: true },
-          ]}
-          onSelect={(value) => (value === 'edit' ? setModal({ item: row }) : setToDelete(row))}
-        />
-      </div>
-    ),
+    render: (row) => <div onClick={(event) => event.stopPropagation()}>{rowMenu(row)}</div>,
   }
+
+  const empty = emptyText ?? `Hali ${noun.toLowerCase()} qo'shilmagan`
+  const asCards = layout !== 'table' && renderCard
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted">{data.length} ta</p>
-        <CusButton size="sm" leftIcon={<Plus />} onClick={() => setModal({ item: null })}>
-          {noun} qo'shish
-        </CusButton>
+        <div className="flex items-center gap-2">
+          {toolbar}
+          <CusButton size="sm" leftIcon={<Plus />} onClick={() => setModal({ item: null })}>
+            {noun} qo'shish
+          </CusButton>
+        </div>
       </div>
 
-      <CusTable
-        columns={[...columns, actionsColumn]}
-        data={data}
-        rowKey={(row) => row.id}
-        onRowClick={(row) => setModal({ item: row })}
-        isLoading={isLoading}
-        emptyText={emptyText ?? `Hali ${noun.toLowerCase()} qo'shilmagan`}
-      />
+      {asCards ? (
+        isLoading ? (
+          <CusSkeleton height="240px" />
+        ) : data.length === 0 ? (
+          <CusEmptyState size="sm" title={empty} />
+        ) : (
+          <div className={layout === 'grid' ? 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3' : 'flex flex-col gap-3'}>
+            {data.map((row) => (
+              <ContentCard
+                key={row.id}
+                layout={layout as 'grid' | 'list'}
+                {...renderCard(row)}
+                menu={rowMenu(row)}
+                onClick={() => setModal({ item: row })}
+              />
+            ))}
+          </div>
+        )
+      ) : (
+        <CusTable
+          columns={[...columns, actionsColumn]}
+          data={data}
+          rowKey={(row) => row.id}
+          onRowClick={(row) => setModal({ item: row })}
+          isLoading={isLoading}
+          emptyText={empty}
+        />
+      )}
 
       {/* Har ochilganda qaytadan mount — forma toza holatdan boshlanadi */}
       {modal && renderModal({ item: modal.item, open: true, onOpenChange: (open) => !open && setModal(null) })}

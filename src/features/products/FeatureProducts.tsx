@@ -31,6 +31,10 @@ import { ProductPriceModal } from './modals/ProductPriceModal'
 import { useProductLayout } from './utils/productLayout'
 import { PAGE_SIZE, useProductFilters, type FilterKey } from './utils/useProductFilters'
 
+/** Kategoriya/subkategoriya filtrini tozalovchi "Hammasi" bandi */
+const ALL_VALUE = '__all'
+const ALL_OPTION = { label: 'Hammasi', value: ALL_VALUE }
+
 const MODE_OPTIONS = [
   { label: 'Barcha xizmatlar', value: 'all' },
   { label: 'Sotuvda', value: 'sale' },
@@ -173,9 +177,9 @@ export default function FeatureProducts() {
             size="md"
             placeholder="Kategoriya"
             clearable
-            options={roots.map((c) => ({ label: c.name, value: String(c.id) }))}
+            options={[ALL_OPTION, ...roots.map((c) => ({ label: c.name, value: String(c.id) }))]}
             value={filters.category ? [filters.category] : []}
-            onChange={([value]) => update({ category: value ?? '', subcategory: '' })}
+            onChange={([value]) => update({ category: value && value !== ALL_VALUE ? value : '', subcategory: '' })}
           />
           <CusSelect
             className="w-full sm:w-44"
@@ -183,9 +187,9 @@ export default function FeatureProducts() {
             placeholder="Subkategoriya"
             clearable
             isDisabled={!filters.category || subcategories.length === 0}
-            options={subcategories.map((c) => ({ label: c.name, value: String(c.id) }))}
+            options={[ALL_OPTION, ...subcategories.map((c) => ({ label: c.name, value: String(c.id) }))]}
             value={filters.subcategory ? [filters.subcategory] : []}
-            onChange={([value]) => update({ subcategory: value ?? '' })}
+            onChange={([value]) => update({ subcategory: value && value !== ALL_VALUE ? value : '' })}
           />
           <CusSelect
             className="w-full sm:w-40"
