@@ -13,6 +13,7 @@ import { CONTENT_LAYOUT_OPTIONS, useContentLayout } from '@/features/store/utils
 import { photoUrl } from '@/utils/media'
 import { formatPeriod, scheduleStatus, sortBySchedule } from '@/utils/schedule'
 import { useDiscountList, useDiscountMutations } from './api-hooks/useDiscounts'
+import { DiscountInfoModal } from './modals/DiscountInfoModal'
 import { DiscountModal } from './modals/DiscountModal'
 import { clearDraft, finishPicking, useDiscountDraft } from './utils/discountDraft'
 import { formatRule } from './utils/discountPrice'
@@ -118,6 +119,7 @@ export default function FeatureDiscounts() {
             ),
           })}
           deleteDescription="Chegirma o'chiriladi, mahsulotlar eski narxga qaytadi. Bu amalni ortga qaytarib bo'lmaydi."
+          renderView={(props) => <DiscountInfoModal {...props} />}
           renderModal={(props) => <DiscountModal {...props} />}
         />
       </CusCard>

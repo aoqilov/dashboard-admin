@@ -1,5 +1,5 @@
 import { useState, type ComponentProps, type ReactNode } from 'react'
-import { Ellipsis, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Ellipsis, Eye, Pencil, Plus, Trash2 } from 'lucide-react'
 import { getErrorMessage } from '@/api/api-config/apiError'
 import { CusButton } from '@/components/ui/buttons/CusButton'
 import { CusIconButton } from '@/components/ui/buttons/CusIconButton'
@@ -37,6 +37,8 @@ interface CrudSectionProps<T extends { id: number }> {
   layout?: ContentLayout
   /** Karta mazmuni — menu (⋯) tayyor beriladi */
   renderCard?: (row: T) => Omit<ComponentProps<typeof ContentCard>, 'layout' | 'menu' | 'onClick'>
+  /** Ma'lumot (faqat ko'rish) modali. Berilsa — qator/karta bosilganda shu ochiladi, tahrirlash menyudan */
+  renderView?: (props: CrudModalProps<T> & { item: T; onEdit: () => void }) => ReactNode
   /** Yaratish/tahrirlash modali — modals/ papkasidan */
   renderModal: (props: CrudModalProps<T>) => ReactNode
 }
@@ -54,9 +56,11 @@ export function CrudSection<T extends { id: number }>({
   toolbar,
   layout = 'table',
   renderCard,
+  renderView,
   renderModal,
 }: CrudSectionProps<T>) {
   const [modal, setModal] = useState<{ item: T | null } | null>(null)
+  const [viewing, setViewing] = useState<T | null>(null)
   const [toDelete, setToDelete] = useState<T | null>(null)
 
   const handleDelete = async () => {
@@ -70,14 +74,19 @@ export function CrudSection<T extends { id: number }>({
     }
   }
 
+  const openRow = (row: T) => (renderView ? setViewing(row) : setModal({ item: row }))
+
   const rowMenu = (row: T) => (
     <CusMenu
       trigger={<CusIconButton icon={Ellipsis} label="Amallar" size="sm" />}
       items={[
+        ...(renderView ? [{ value: 'view', label: "Ko'rish", icon: <Eye className="size-4" /> }] : []),
         { value: 'edit', label: 'Tahrirlash', icon: <Pencil className="size-4" /> },
         { value: 'delete', label: "O'chirish", icon: <Trash2 className="size-4" />, isDanger: true },
       ]}
-      onSelect={(value) => (value === 'edit' ? setModal({ item: row }) : setToDelete(row))}
+      onSelect={(value) =>
+        value === 'view' ? setViewing(row) : value === 'edit' ? setModal({ item: row }) : setToDelete(row)
+      }
     />
   )
 
@@ -117,7 +126,7 @@ export function CrudSection<T extends { id: number }>({
                 layout={layout as 'grid' | 'list'}
                 {...renderCard(row)}
                 menu={rowMenu(row)}
-                onClick={() => setModal({ item: row })}
+                onClick={() => openRow(row)}
               />
             ))}
           </div>
@@ -127,11 +136,22 @@ export function CrudSection<T extends { id: number }>({
           columns={[...columns, actionsColumn]}
           data={data}
           rowKey={(row) => row.id}
-          onRowClick={(row) => setModal({ item: row })}
+          onRowClick={openRow}
           isLoading={isLoading}
           emptyText={empty}
         />
       )}
+
+      {viewing &&
+        renderView?.({
+          item: viewing,
+          open: true,
+          onOpenChange: (open) => !open && setViewing(null),
+          onEdit: () => {
+            setModal({ item: viewing })
+            setViewing(null)
+          },
+        })}
 
       {/* Har ochilganda qaytadan mount — forma toza holatdan boshlanadi */}
       {modal && renderModal({ item: modal.item, open: true, onOpenChange: (open) => !open && setModal(null) })}

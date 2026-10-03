@@ -14,6 +14,7 @@ import { CONTENT_LAYOUT_OPTIONS, useContentLayout } from '@/features/store/utils
 import { photoUrl } from '@/utils/media'
 import { formatPeriod, scheduleStatus, sortBySchedule } from '@/utils/schedule'
 import { useNewsList, useNewsMutations } from './api-hooks/useNews'
+import { NewsInfoModal } from './modals/NewsInfoModal'
 import { NewsModal } from './modals/NewsModal'
 import { clearNewsDraft, finishNewsPicking, useNewsDraft } from './utils/newsDraft'
 import { newsType } from './utils/newsTypes'
@@ -112,6 +113,7 @@ export default function FeatureNews() {
             ),
           })}
           deleteDescription="Yangilik saytdan ham olib tashlanadi. Bu amalni ortga qaytarib bo'lmaydi."
+          renderView={(props) => <NewsInfoModal {...props} />}
           renderModal={(props) => <NewsModal {...props} />}
         />
       </CusCard>

@@ -6,10 +6,10 @@ import { saleDiscount, type DiscountRule } from '@/features/discounts/utils/disc
 import { formatPrice } from '@/utils/format'
 
 /** Mahsulot rasmi yoki bo'sh joy belgisi */
-export function ProductImage({ src, className }: { src?: string; className?: string }) {
+export function ProductImage({ src, className, contain }: { src?: string; className?: string; contain?: boolean }) {
   return (
     <span className={cn('flex shrink-0 items-center justify-center overflow-hidden bg-hover text-subtle', className)}>
-      {src ? <img src={src} alt="" loading="lazy" className="size-full object-cover" /> : <ImageOff className="size-5" />}
+      {src ? <img src={src} alt="" loading="lazy" className={cn('size-full', contain ? 'object-contain' : 'object-cover')} /> : <ImageOff className="size-5" />}
     </span>
   )
 }

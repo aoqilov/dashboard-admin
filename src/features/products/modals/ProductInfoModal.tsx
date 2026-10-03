@@ -100,7 +100,7 @@ export function ProductInfoModal({ product, open, onOpenChange, onEdit }: Produc
         </>
       }
     >
-      <div className="grid gap-8 pt-4 md:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]">
+      <div className="grid gap-8 pt-4 md:grid-cols-[minmax(0,4.8fr)_minmax(0,5fr)]">
         {/* Rasmlar: chapda variant tugmalari, yonida slayder */}
         <div className="flex min-w-0 gap-4">
           {variants.length > 0 && (
@@ -125,7 +125,7 @@ export function ProductInfoModal({ product, open, onOpenChange, onEdit }: Produc
 
           <div className="flex min-w-0 flex-1 flex-col gap-3">
             <div className="relative">
-              <ProductImage src={photoUrl(current, 'large')} className="aspect-3/4 w-full rounded-card [&_svg]:size-10" />
+              <ProductImage contain src={photoUrl(current, 'large')} className="aspect-3/4 w-full rounded-card [&_svg]:size-10" />
               {slides.length > 1 && (
                 <>
                   <SlideArrow side="left" onClick={() => go(-1)} />

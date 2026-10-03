@@ -15,7 +15,9 @@ export function SocialLinksTab() {
     {
       key: 'platform',
       header: 'Platforma',
-      render: (row) => <span className="text-sm font-medium text-heading">{PLATFORMS[row.platform]?.label ?? row.platform}</span>,
+      render: (row) => (
+        <span className="text-sm font-medium text-heading">{PLATFORMS[row.platform]?.label ?? row.platform}</span>
+      ),
     },
     {
       key: 'nickname',

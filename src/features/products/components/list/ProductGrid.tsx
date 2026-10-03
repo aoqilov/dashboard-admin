@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Check, Eye, Heart } from 'lucide-react'
 import type { StoreProduct } from '@/api/routes/stores-products/storeProducts.types'
 import { CusSkeleton } from '@/components/ui/skeleton/CusSkeleton'
@@ -31,28 +32,52 @@ interface ProductGridProps {
   onAction: (action: ProductAction, product: StoreProduct) => void
   /** Chegirma uchun tanlash rejimi: kartani bosish — tanlash/bekor qilish */
   selection?: { ids: Set<number>; onToggle: (product: StoreProduct) => void }
+  /** Ustunlar sonini qo'lda berish (modal ichida kengligi boshqacha) */
+  columnsClassName?: string
+  /** ⋯ menyusiz — faqat ko'rish */
+  hideActions?: boolean
+  /** Rasm ustidagi belgi (chap pastda) */
+  overlay?: (product: StoreProduct) => ReactNode
 }
 
 /** Mahsulotlar to'ri. Asosiy rasm doim 3:4 nisbatda */
-export function ProductGrid({ products, tree, layout, isLoading, onAction, selection }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  tree,
+  layout,
+  isLoading,
+  onAction,
+  selection,
+  columnsClassName,
+  hideActions,
+  overlay,
+}: ProductGridProps) {
   const { data: rules } = useDiscountRules()
   const horizontal = layout === 'grid4'
   const compact = layout === 'grid12'
 
   if (isLoading) {
     return (
-      <div className={cn('grid gap-4', COLUMNS[layout])}>
+      <div className={cn('grid gap-4', columnsClassName ?? COLUMNS[layout])}>
         {Array.from({ length: SKELETON_COUNT[layout] }, (_, index) => (
           <div
             key={index}
-            className={cn('overflow-hidden rounded-card bg-surface shadow-card', horizontal ? 'flex gap-3 p-3' : 'flex flex-col')}
+            className={cn(
+              'overflow-hidden rounded-card bg-surface shadow-card',
+              horizontal ? 'flex gap-3 p-3' : 'flex flex-col',
+            )}
           >
             <div className={cn('shrink-0', horizontal && 'w-28 sm:w-32')}>
               <div className="aspect-3/4 w-full">
                 <CusSkeleton height="full" borderRadius={horizontal ? 'l2' : '0'} />
               </div>
             </div>
-            <div className={cn('flex flex-1 flex-col', horizontal ? 'gap-2 py-0.5' : compact ? 'gap-1.5 p-1.5' : 'gap-2 p-2.5')}>
+            <div
+              className={cn(
+                'flex flex-1 flex-col',
+                horizontal ? 'gap-2 py-0.5' : compact ? 'gap-1.5 p-1.5' : 'gap-2 p-2.5',
+              )}
+            >
               <CusSkeleton height="3.5" width="75%" />
               {!compact && layout !== 'grid8' && <CusSkeleton height="3" width="50%" />}
               <CusSkeleton height="3.5" width="40%" />
@@ -65,7 +90,7 @@ export function ProductGrid({ products, tree, layout, isLoading, onAction, selec
   }
 
   return (
-    <div className={cn('grid gap-4', COLUMNS[layout])}>
+    <div className={cn('grid gap-4', columnsClassName ?? COLUMNS[layout])}>
       {products.map((product) => {
         const isOn = selection?.ids.has(product.id)
         const open = () => (selection ? selection.onToggle(product) : onAction('view', product))
@@ -88,6 +113,7 @@ export function ProductGrid({ products, tree, layout, isLoading, onAction, selec
                 src={productCover(product, 'medium')}
                 className={cn('aspect-3/4 w-full', horizontal && 'rounded-control')}
               />
+              {overlay && <div className="absolute bottom-1.5 left-1.5">{overlay(product)}</div>}
               {selection && (
                 <span
                   className={cn(
@@ -98,22 +124,36 @@ export function ProductGrid({ products, tree, layout, isLoading, onAction, selec
                   {isOn && <Check className="size-3.5" />}
                 </span>
               )}
-              {!selection && !horizontal && (
+              {!selection && !horizontal && !hideActions && (
                 <div className="absolute top-1.5 right-1.5 rounded-full bg-surface/90 shadow-xs">
                   <ProductActionsMenu product={product} onAction={onAction} />
                 </div>
               )}
             </div>
 
-            <div className={cn('min-w-0 flex-1', horizontal ? 'flex flex-col gap-1.5 py-0.5' : compact ? 'flex flex-col gap-0.5 p-1.5' : 'flex flex-col gap-1 p-2.5')}>
+            <div
+              className={cn(
+                'min-w-0 flex-1',
+                horizontal
+                  ? 'flex flex-col gap-1.5 py-0.5'
+                  : compact
+                    ? 'flex flex-col gap-0.5 p-1.5'
+                    : 'flex flex-col gap-1 p-2.5',
+              )}
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className={cn('truncate font-medium text-heading', compact ? 'text-xs' : 'text-sm')} title={product.name}>
+                  <p
+                    className={cn('truncate font-medium text-heading', compact ? 'text-xs' : 'text-sm')}
+                    title={product.name}
+                  >
                     {product.name}
                   </p>
                   {horizontal && <p className="truncate text-xs text-subtle">/{product.slug}</p>}
                 </div>
-                {!selection && horizontal && <ProductActionsMenu product={product} onAction={onAction} />}
+                {!selection && horizontal && !hideActions && (
+                  <ProductActionsMenu product={product} onAction={onAction} />
+                )}
               </div>
 
               {layout !== 'grid8' && !compact && (
